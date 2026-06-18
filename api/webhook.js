@@ -3,13 +3,12 @@
 const express = require("express");
 const router = express.Router();
 const { getAIReply } = require("../services/ai");
-const { sendText } = require("../utils/respond");
 
 router.post("/", async (req, res) => {
     try {
         const body = req.body;
-        const phone = body.from;
-        const message = (body.content?.text || body.UserResponse || "").trim();
+        const phone = body.from || "";
+        const message = (body.content?.text || body.UserResponse || body.text || "").trim();
 
         console.log("Incoming:", phone, message);
 
@@ -17,25 +16,14 @@ router.post("/", async (req, res) => {
             return res.status(200).json({ success: true, reply: "" });
         }
 
-        // AI se info lo - har cheez ke liye
+        // AI se info lo
         const prompt = `User is asking about: "${message}"
 
-Give a short, accurate, professional response about this procedure/treatment in 3-4 lines. Include:
-- What it is
-- Key benefits
-- Recovery time if applicable
-
-End with: "Book a free consultation to know more!"
-
-Keep it simple, easy to understand, and medically accurate.`;
+Give a short, accurate, professional response about this procedure/treatment in 3-4 lines. Include what it is, key benefits, and recovery time. End with: "Book a free consultation to know more!"`;
 
         const aiReply = await getAIReply(prompt);
 
-        // User ko WhatsApp pe bhejo
-        if (phone) {
-            await sendText(phone, `ℹ️ *${message}*\n\n${aiReply}`);
-        }
-
+        // Sirf response return karo - 11za khud display karega
         return res.status(200).json({
             success: true,
             reply: aiReply,
@@ -46,7 +34,7 @@ Keep it simple, easy to understand, and medically accurate.`;
         console.error("Webhook error:", error.message);
         return res.status(200).json({
             success: true,
-            reply: "Sorry, something went wrong. Please try again."
+            reply: "Please contact us at celebre.in for more information."
         });
     }
 });
