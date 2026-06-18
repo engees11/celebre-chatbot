@@ -1,4 +1,4 @@
-// services/ai.js - Gemini API
+// services/ai.js - Groq API
 
 const axios = require("axios");
 const { celebreData } = require("./celebreData");
@@ -6,34 +6,29 @@ const { celebreData } = require("./celebreData");
 async function getAIReply(userMessage) {
     try {
         const response = await axios.post(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+            "https://api.groq.com/openai/v1/chat/completions",
             {
-                contents: [
-                    {
-                        parts: [
-                            {
-                                text: `${celebreData.systemPrompt}\n\nUser: ${userMessage}`
-                            }
-                        ]
-                    }
+                model: "llama-3.1-8b-instant",
+                messages: [
+                    { role: "system", content: celebreData.systemPrompt },
+                    { role: "user", content: userMessage }
                 ],
-                generationConfig: {
-                    maxOutputTokens: 200,
-                    temperature: 0.7
-                }
+                max_tokens: 200,
+                temperature: 0.7
             },
             {
                 headers: {
+                    Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
                     "Content-Type": "application/json"
                 }
             }
         );
 
-        return response.data.candidates[0].content.parts[0].text;
+        return response.data.choices[0].message.content;
 
     } catch (error) {
-        console.error("Gemini Error:", error.message);
-        return "I'm sorry, I couldn't process that right now. Please contact us at celebre.in";
+        console.error("AI Error:", error.message);
+        return "I'm sorry, I couldn't process that. Please contact us at celebre.in";
     }
 }
 
