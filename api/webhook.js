@@ -189,10 +189,10 @@ router.post("/", async (req, res) => {
                     // Single service — seedha info do
                     await updateConvo(phone, { state: "service_info", selected_category: cat, selected_service: "Gynecomastia Surgery" });
 
-                    const aiInfo = await getAIReply("Tell me about Gynecomastia surgery at Celebre Aesthetics", "User selected Gynecomastia");
+                    const aiInfo = await getAIReply("Tell me about Gynecomasia surgery at Celebre Aesthetics", "User selected Gynecomastia");
                     await sendText(phone, "ℹ️ *Gynecomastia Surgery*\n\n" + aiInfo);
 
-                    await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services", "Ask a Question"]);
+                    await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services"]);
                     await updateConvo(phone, { state: "booking_ask" });
                 } else {
                     await sendList(phone,
@@ -266,28 +266,11 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
 
-            if (lower.includes("ask") || lower.includes("question")) {
-                await sendText(phone, "Sure! Feel free to ask anything about " + (convo.selected_service || "our treatments") + ". I'm here to help! 😊");
-                await updateConvo(phone, { state: "asking_question" });
-                return res.status(200).json({ success: true });
-            }
-
             // Default
             const aiReply = await getAIReply(message, "User was asked to book a call for " + convo.selected_service);
             await sendText(phone, aiReply);
             return res.status(200).json({ success: true });
         }
-
-        // STATE: asking_question
-        if (convo.state === "asking_question") {
-            const aiReply = await getAIReply(message, "User is asking about " + (convo.selected_service || convo.selected_category || "treatments"));
-            await sendText(phone, aiReply);
-
-            await sendButtons(phone, "Anything else I can help with?", ["Book a Call", "View Services", "Ask More"]);
-            await updateConvo(phone, { state: "booking_ask" });
-            return res.status(200).json({ success: true });
-        }
-
         // STATE: date_selection
         if (convo.state === "date_selection") {
             if (isValidFutureDate(message)) {
