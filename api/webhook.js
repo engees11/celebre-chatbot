@@ -228,7 +228,7 @@ router.post("/", async (req, res) => {
                 );
                 await sendText(phone, "ℹ️ *" + svc.service + "*\n\n" + aiInfo);
 
-                await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services", "Ask a Question"]);
+                await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services"]);
                 await updateConvo(phone, { state: "booking_ask" });
                 return res.status(200).json({ success: true });
             }
