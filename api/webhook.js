@@ -131,6 +131,12 @@ router.post("/", async (req, res) => {
         if (!phone || !message) {
             return res.status(200).json({ success: true });
         }
+        // Sirf test number pe reply karo
+        const TEST_NUMBERS = ["917820870519"];
+        if (!TEST_NUMBERS.includes(phone)) {
+            console.log("Skipping non-test number:", phone);
+            return res.status(200).json({ success: true });
+        }
 
         const convo = await getConvo(phone, senderName);
 
