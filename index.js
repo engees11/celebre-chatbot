@@ -11,10 +11,23 @@ const app = express();
 app.use(express.json());
 
 // MongoDB connect
-mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log("MongoDB connected ✅"))
-    .catch(err => console.error("MongoDB error:", err.message));
+let isConnected = false;
 
+async function connectDB() {
+    if (isConnected) return;
+    try {
+        await mongoose.connect(process.env.MONGODB_URI, {
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
+        });
+        isConnected = true;
+        console.log("MongoDB connected ✅");
+    } catch (err) {
+        console.error("MongoDB error:", err.message);
+    }
+}
+
+connectDB();
 // Routes
 app.get("/", (req, res) => {
     res.send("Celebre Chatbot is running! 🌸");
