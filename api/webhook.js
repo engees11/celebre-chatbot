@@ -124,7 +124,18 @@ router.post("/", async (req, res) => {
         const body = req.body;
         const phone = body.from || "";
         const senderName = body.whatsapp?.senderName || "";
-        const message = (body.content?.text || body.UserResponse || "").trim();
+        const message = (
+            body.content?.text ||
+            body.UserResponse ||
+            body.interactive?.title ||
+            body.interactive?.list_reply?.title ||
+            body.interactive?.button_reply?.title ||
+            body.listReply?.title ||
+            body.buttonReply?.title ||
+            ""
+        ).trim();
+
+        console.log("Full body:", JSON.stringify(body));
 
         console.log("Incoming:", phone, message);
 
