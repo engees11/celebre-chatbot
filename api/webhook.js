@@ -125,22 +125,25 @@ router.post("/", async (req, res) => {
         const phone = body.from || "";
         const senderName = body.whatsapp?.senderName || "";
         const message = (
-            body.content?.text ||
             body.UserResponse ||
             body.whatsapp?.title ||
+            body.postback?.data ||
+            body.content?.text ||
             body.interactive?.title ||
             body.interactive?.list_reply?.title ||
             body.interactive?.button_reply?.title ||
             body.listReply?.title ||
             body.buttonReply?.title ||
             ""
-        ).trim();
+        ).toString().trim();
+        console.log("TITLE =", body.whatsapp?.title);
+        console.log("MESSAGE =", message);
 
         console.log("Full body:", JSON.stringify(body));
 
         console.log("Incoming:", phone, message);
 
-        if (!phone || !message) {
+        if (!phone) {
             return res.status(200).json({ success: true });
         }
         // Sirf test number pe reply karo
