@@ -84,7 +84,7 @@ function isValidFutureDate(dateStr) {
 
 // Check if message is a greeting
 function isGreeting(msg) {
-    return ["hi", "hello", "hey", "hii", "hiii", "start", "helo", "namaste"].includes(msg.toLowerCase());
+    return ["hi", "hello", "hey", "hii", "hiii", "start", "helo", "namaste", "celebre", "celebre aesthetics"].includes(msg.toLowerCase());
 }
 
 // Find matching category

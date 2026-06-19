@@ -38,7 +38,7 @@ async function sendButtons(phone, bodyText, buttons, headerText, footerText) {
             contentType: "interactive",
             interactive: {
                 subType: "buttons",
-                header: headerText ? { type: "text", text: headerText.substring(0, 60) } : { type: "none" },
+                header: { type: "text", text: (headerText || "Celebre Aesthetics").substring(0, 60) },
                 body: { type: "text", text: bodyText.substring(0, 1024) },
                 footer: { type: "text", text: (footerText || "Celebre Aesthetics").substring(0, 60) },
                 buttons: btnArray
@@ -68,7 +68,7 @@ async function sendList(phone, bodyText, listTitle, sections, headerText, footer
             contentType: "interactive",
             interactive: {
                 subType: "list",
-                header: headerText ? { type: "text", text: headerText.substring(0, 60) } : { type: "none" },
+                header: { type: "text", text: (headerText || "Celebre Aesthetics").substring(0, 60) },
                 body: { type: "text", text: bodyText.substring(0, 1024) },
                 footer: { type: "text", text: (footerText || "Celebre Aesthetics").substring(0, 60) },
                 list: {
