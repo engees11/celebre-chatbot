@@ -268,6 +268,12 @@ router.post("/", async (req, res) => {
             await sendText(phone, reply);
             return res.status(200).json({ success: true });
         }
+        // Get AI info about the service
+        const aiInfo = await getAIReply(
+            "Tell me about " + convo.selected_service + " at Celebre Aesthetics. Reply in " + aiLang(lang),
+            "User selected " + convo.selected_service + " from " + convo.selected_category
+        );
+        await sendText(phone, "ℹ️ *" + convo.selected_service + "*\n\n" + aiInfo);
 
         // ===== FORM: NAME =====
         if (convo.state === "form_name") {
@@ -345,11 +351,11 @@ router.post("/", async (req, res) => {
             await up(phone, { form_call_time: message, state: "service_info" });
 
             // Get AI info about the service
-            const aiInfo = await getAIReply(
-                "Tell me about " + convo.selected_service + " at Celebre Aesthetics. Reply in " + aiLang(lang),
-                "User selected " + convo.selected_service + " from " + convo.selected_category
-            );
-            await sendText(phone, "ℹ️ *" + convo.selected_service + "*\n\n" + aiInfo);
+            //const aiInfo = await getAIReply(
+            // "Tell me about " + convo.selected_service + " at Celebre Aesthetics. Reply in " + aiLang(lang),
+            // "User selected " + convo.selected_service + " from " + convo.selected_category
+            // );
+            //await sendText(phone, "ℹ️ *" + convo.selected_service + "*\n\n" + aiInfo);
 
             // Send confirmation
             const config = getConfig(convo.selected_category);
