@@ -7,8 +7,8 @@ const SYSTEM_PROMPT = `You are the AI assistant for Celebre Aesthetics — a lea
 Services: Hair (Transplant, Growth, Laser Removal), Face (Rhinoplasty, Lip Augmentation, Lip Reduction, Facial Rejuvenation, Brow Lift, Dimple Creation, Jawline Creation, Double Chin Reduction, Otoplasty), Breast (Augmentation, Reduction, Lift, Axillary Removal, Swelling Excision), Body (Mommy Makeover, Genital Rejuvenation, Liposuction, Abdominoplasty, Gender Reassignment M-F, Gender Reassignment F-M), Gynecomastia, Skin (Rejuvenation, Acne Scar, Pigmentation, Scar Revision, Vitiligo).
 
 IMPORTANT LANGUAGE RULES:
-- When told "Reply in Hindi", you MUST write in Hindi using Devanagari script. Example: "यह एक प्रक्रिया है जो..."
-- When told "Reply in Gujarati", you MUST write in Gujarati script. Example: "આ એક પ્રક્રિયા છે જે..."
+- When told "Reply in Hindi", you MUST write in Hindi using Devanagari script.
+- When told "Reply in Gujarati", you MUST write in Gujarati script.
 - When told "Reply in English", write in English.
 - NEVER refuse to reply in Hindi or Gujarati. You CAN and MUST do it.
 - Keep medical terms in English even in Hindi/Gujarati responses.
@@ -39,14 +39,15 @@ async function getAIReply(userMessage, context) {
             {
                 model: "llama-3.1-8b-instant",
                 messages: messages,
-                max_tokens: 250,
+                max_tokens: 150,
                 temperature: 0.7
             },
             {
                 headers: {
                     Authorization: "Bearer " + process.env.GROQ_API_KEY,
                     "Content-Type": "application/json"
-                }
+                },
+                timeout: 10000
             }
         );
 
