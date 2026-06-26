@@ -1,4 +1,4 @@
-// api/webhook.js - Full AI Conversation Handler
+// api/webhook.js - Full AI Conversation Handler with Language + Forms
 
 const express = require("express");
 const router = express.Router();
@@ -6,7 +6,7 @@ const Conversation = require("../models/conversation");
 const { getAIReply } = require("../services/ai");
 const { sendText, sendButtons, sendList } = require("../utils/respond");
 
-// Service categories
+// ============ CATEGORIES ============
 const CATEGORIES = {
     "Hair Treatment": [
         { title: "Hair Transplant", description: "FUE scar-free method" },
@@ -51,54 +51,218 @@ const CATEGORIES = {
     ]
 };
 
-// Time slots
-const TIME_SLOTS = [
-    "11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM",
-    "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"
-];
+// ============ FORM CONFIG PER CATEGORY ============
+const FORM_CONFIG = {
+    "Hair Treatment": {
+        needsWeight: false,
+        needsHeight: false,
+        specificField: "hair_loss_stage",
+        specificOptions: ["Mild", "Moderate", "Severe"],
+        photoRequest: true,
+        photoType: "hair"
+    },
+    "Face Treatment": {
+        needsWeight: false,
+        needsHeight: false,
+        specificField: "nose_concern",
+        specificOptions: null,
+        photoRequest: true,
+        photoType: "face"
+    },
+    "Breast Treatment": {
+        needsWeight: true,
+        needsHeight: true,
+        specificField: "desired_procedure",
+        specificOptions: ["Enhancement", "Reduction", "Lift"],
+        photoRequest: false,
+        photoType: null
+    },
+    "Body Treatment": {
+        needsWeight: true,
+        needsHeight: true,
+        specificField: "treatment_areas",
+        specificOptions: null,
+        photoRequest: false,
+        photoType: null
+    },
+    "Gynecomastia": {
+        needsWeight: true,
+        needsHeight: true,
+        specificField: null,
+        specificOptions: null,
+        photoRequest: true,
+        photoType: "chest"
+    },
+    "Skin Treatment": {
+        needsWeight: false,
+        needsHeight: false,
+        specificField: "skin_concern",
+        specificOptions: null,
+        photoRequest: true,
+        photoType: "skin"
+    }
+};
 
-// Get or create conversation
+// ============ MULTILINGUAL MESSAGES ============
+const MSGS = {
+    lang_ask: {
+        en: "Please select your preferred language:",
+        hi: "Please select your preferred language:",
+        gu: "Please select your preferred language:"
+    },
+    welcome: {
+        en: "👋 Hi {name}! Welcome to *Celebre Aesthetics* 🌸\n\nWe are Gujarat's leading aesthetic surgery & cosmetic treatment clinic with centers in Surat, Ahmedabad & Rajkot.\n\nI can help you explore our treatments and book a free consultation call.",
+        hi: "👋 नमस्ते {name}! *Celebre Aesthetics* में आपका स्वागत है 🌸\n\nहम गुजरात की अग्रणी एस्थेटिक सर्जरी और कॉस्मेटिक ट्रीटमेंट क्लिनिक हैं — सूरत, अहमदाबाद और राजकोट में।\n\nमैं आपकी ट्रीटमेंट जानने और फ्री कंसल्टेशन बुक करने में मदद कर सकता/सकती हूँ।",
+        gu: "👋 નમસ્તે {name}! *Celebre Aesthetics* માં આપનું સ્વાગત છે 🌸\n\nઅમે ગુજરાતની અગ્રણી એસ્થેટિક સર્જરી અને કોસ્મેટિક ટ્રીટમેન્ટ ક્લિનિક છીએ — સુરત, અમદાવાદ અને રાજકોટમાં.\n\nહું તમને ટ્રીટમેન્ટ વિશે જાણવા અને ફ્રી કન્સલ્ટેશન બુક કરવામાં મદદ કરી શકું છું."
+    },
+    select_category: {
+        en: "Please select a treatment category to explore:",
+        hi: "कृपया एक ट्रीटमेंट कैटेगरी चुनें:",
+        gu: "કૃપા કરીને એક ટ્રીટમેન્ટ કેટેગરી પસંદ કરો:"
+    },
+    select_service: {
+        en: "Here are our {cat} options. Please select one:",
+        hi: "यहाँ हमारे {cat} के विकल्प हैं। कृपया एक चुनें:",
+        gu: "અહીં અમારા {cat} ના વિકલ્પો છે. કૃપા કરીને એક પસંદ કરો:"
+    },
+    book_ask: {
+        en: "Would you like to book a free consultation call?",
+        hi: "क्या आप फ्री कंसल्टेशन कॉल बुक करना चाहेंगे?",
+        gu: "શું તમે ફ્રી કન્સલ્ટેશન કૉલ બુક કરવા માંગો છો?"
+    },
+    ask_name: {
+        en: "👤 Please share your *Name*:",
+        hi: "👤 कृपया अपना *नाम* बताएं:",
+        gu: "👤 કૃપા કરીને તમારું *નામ* જણાવો:"
+    },
+    ask_city: {
+        en: "📍 Please share your *City / Location*:",
+        hi: "📍 कृपया अपना *शहर / लोकेशन* बताएं:",
+        gu: "📍 કૃપા કરીને તમારું *શહેર / સ્થાન* જણાવો:"
+    },
+    ask_age: {
+        en: "🎂 Please share your *Age*:",
+        hi: "🎂 कृपया अपनी *उम्र* बताएं:",
+        gu: "🎂 કૃપા કરીને તમારી *ઉંમર* જણાવો:"
+    },
+    ask_weight: {
+        en: "⚖️ Please share your *Approx. Weight* (in kg):",
+        hi: "⚖️ कृपया अपना *अनुमानित वज़न* (kg में) बताएं:",
+        gu: "⚖️ કૃપા કરીને તમારું *અંદાજિત વજન* (kg માં) જણાવો:"
+    },
+    ask_height: {
+        en: "📏 Please share your *Height*:",
+        hi: "📏 कृपया अपनी *ऊंचाई* बताएं:",
+        gu: "📏 કૃપા કરીને તમારી *ઊંચાઈ* જણાવો:"
+    },
+    ask_specific: {
+        hair_loss_stage: {
+            en: "💇 Please describe your *Hair Loss Stage*:",
+            hi: "💇 कृपया अपना *हेयर लॉस स्टेज* बताएं:",
+            gu: "💇 કૃપા કરીને તમારો *હેર લોસ સ્ટેજ* જણાવો:"
+        },
+        nose_concern: {
+            en: "🎯 Please describe your *Concern with your Nose* (Shape, Size, Bump, Breathing Issue, etc.):",
+            hi: "🎯 कृपया अपनी *नाक से संबंधित समस्या* बताएं (आकार, साइज़, उभार, सांस की समस्या आदि):",
+            gu: "🎯 કૃપા કરીને તમારી *નાક સંબંધિત સમસ્યા* જણાવો (આકાર, સાઈઝ, બ્રીથિંગ ઈશ્યુ વગેરે):"
+        },
+        desired_procedure: {
+            en: "🎯 Please select your *Desired Procedure*:",
+            hi: "🎯 कृपया अपनी *इच्छित प्रक्रिया* चुनें:",
+            gu: "🎯 કૃપા કરીને તમારી *ઈચ્છિત પ્રક્રિયા* પસંદ કરો:"
+        },
+        treatment_areas: {
+            en: "📍 Please mention the *Area(s) You Want Treated* (Abdomen, Waist, Thighs, Arms, Chin, etc.):",
+            hi: "📍 कृपया बताएं *किन हिस्सों का इलाज* चाहते हैं (पेट, कमर, जांघ, बाहें, ठुड्डी आदि):",
+            gu: "📍 કૃપા કરીને જણાવો *કયા ભાગની સારવાર* કરાવવા માંગો છો (પેટ, કમર, જાંઘ, હાથ, ચિન વગેરે):"
+        },
+        skin_concern: {
+            en: "🎯 Please describe your *Skin Concern* (Acne, Acne Scars, Pigmentation, Dark Spots, Anti-Aging, etc.):",
+            hi: "🎯 कृपया अपनी *त्वचा की समस्या* बताएं (एक्ने, दाग, पिगमेंटेशन, डार्क स्पॉट्स, एंटी-एजिंग आदि):",
+            gu: "🎯 કૃપા કરીને તમારી *ત્વચા સંબંધિત સમસ્યા* જણાવો (એક્ને, ડાઘ, પિગમેન્ટેશન, ડાર્ક સ્પોટ્સ, એન્ટી-એજિંગ વગેરે):"
+        }
+    },
+    ask_photos: {
+        hair: {
+            en: "📸 Please share *2-3 Clear Hair Photos* (Front, Top & Back):",
+            hi: "📸 कृपया *2-3 साफ बालों की फोटो* भेजें (आगे, ऊपर और पीछे):",
+            gu: "📸 કૃપા કરીને *2-3 સ્પષ્ટ વાળના ફોટો* મોકલો (આગળ, ઉપર અને પાછળ):"
+        },
+        face: {
+            en: "📸 Please share *Front & Side Profile Photos*:",
+            hi: "📸 कृपया *सामने और साइड प्रोफाइल फोटो* भेजें:",
+            gu: "📸 કૃપા કરીને *આગળ અને સાઈડ પ્રોફાઈલ ફોટો* મોકલો:"
+        },
+        chest: {
+            en: "📸 Please share *2-3 Clear Chest Photos*:",
+            hi: "📸 कृपया *2-3 साफ छाती की फोटो* भेजें:",
+            gu: "📸 કૃપા કરીને *2-3 સ્પષ્ટ છાતીના ફોટો* મોકલો:"
+        },
+        skin: {
+            en: "📸 Please share *2-3 Clear Photos of the Concerned Area*:",
+            hi: "📸 कृपया *प्रभावित क्षेत्र की 2-3 साफ फोटो* भेजें:",
+            gu: "📸 કૃપા કરીને *અસરગ્રસ્ત વિસ્તારના 2-3 સ્પષ્ટ ફોટો* મોકલો:"
+        }
+    },
+    ask_call_time: {
+        en: "⏰ Please share your *Preferred Time for a Call* (11 AM to 8 PM):",
+        hi: "⏰ कृपया *कॉल के लिए पसंदीदा समय* बताएं (सुबह 11 बजे से रात 8 बजे तक):",
+        gu: "⏰ કૃપા કરીને *કૉલ માટે પસંદગીનો સમય* જણાવો (સવારે 11 થી રાત્રે 8 સુધી):"
+    },
+    confirmed: {
+        en: "✅ *Consultation Request Received!*\n\n🏥 Service: *{service}*\n👤 Name: *{name}*\n📍 City: *{city}*\n🎂 Age: *{age}*\n{extra}⏰ Call Time: *{time}*\n\nOur specialist will contact you soon.\n\nThank you for choosing *Celebre Aesthetics*! 💜\n\n📍 Surat | Ahmedabad | Rajkot\n🌐 celebre.in",
+        hi: "✅ *कंसल्टेशन रिक्वेस्ट मिल गई!*\n\n🏥 सेवा: *{service}*\n👤 नाम: *{name}*\n📍 शहर: *{city}*\n🎂 उम्र: *{age}*\n{extra}⏰ कॉल का समय: *{time}*\n\nहमारे विशेषज्ञ जल्द ही आपसे संपर्क करेंगे।\n\n*Celebre Aesthetics* चुनने के लिए धन्यवाद! 💜\n\n📍 सूरत | अहमदाबाद | राजकोट\n🌐 celebre.in",
+        gu: "✅ *કન્સલ્ટેશન રિક્વેસ્ટ મળી ગઈ!*\n\n🏥 સેવા: *{service}*\n👤 નામ: *{name}*\n📍 શહેર: *{city}*\n🎂 ઉંમર: *{age}*\n{extra}⏰ કૉલનો સમય: *{time}*\n\nઅમારા નિષ્ણાત ટૂંક સમયમાં તમારો સંપર્ક કરશે.\n\n*Celebre Aesthetics* પસંદ કરવા બદલ આભાર! 💜\n\n📍 સુરત | અમદાવાદ | રાજકોટ\n🌐 celebre.in"
+    },
+    btn_book: { en: "Yes, Book a Call", hi: "हाँ, कॉल बुक करें", gu: "હા, કૉલ બુક કરો" },
+    btn_other: { en: "View Other Services", hi: "अन्य सेवाएं देखें", gu: "અન્ય સેવાઓ જુઓ" },
+    btn_ask: { en: "Ask a Question", hi: "सवाल पूछें", gu: "પ્રશ્ન પૂછો" }
+};
+
+// ============ HELPERS ============
+function msg(key, lang, replacements) {
+    let text = "";
+    if (typeof key === "object") {
+        text = key[lang] || key["en"] || "";
+    } else {
+        text = MSGS[key]?.[lang] || MSGS[key]?.["en"] || "";
+    }
+    if (replacements) {
+        for (const k in replacements) {
+            text = text.replace(new RegExp("\\{" + k + "\\}", "g"), replacements[k]);
+        }
+    }
+    return text;
+}
+
 async function getConvo(phone, name) {
     let convo = await Conversation.findOne({ phone });
     if (!convo) {
-        convo = new Conversation({ phone, name, state: "welcome" });
+        convo = new Conversation({ phone, name, state: "language_selection" });
         await convo.save();
     }
     return convo;
 }
 
-// Update conversation
 async function updateConvo(phone, data) {
     data.updated_at = new Date();
     await Conversation.findOneAndUpdate({ phone }, data, { upsert: true });
 }
 
-// Date validate
-function isValidFutureDate(dateStr) {
-    const parsed = new Date(dateStr);
-    if (isNaN(parsed.getTime())) return false;
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return parsed >= today;
+function isGreeting(m) {
+    return ["hi", "hello", "hey", "hii", "hiii", "start", "helo", "namaste", "celebre", "celebre aesthetics"].includes(m.toLowerCase());
 }
 
-// Check if message is a greeting
-function isGreeting(msg) {
-    return ["hi", "hello", "hey", "hii", "hiii", "start", "helo", "namaste", "celebre", "celebre aesthetics"].includes(msg.toLowerCase());
-}
-
-// Find matching category
-function findCategory(msg) {
-    const lower = msg.toLowerCase();
+function findCategory(m) {
+    const lower = m.toLowerCase();
     for (const cat of Object.keys(CATEGORIES)) {
         if (lower.includes(cat.toLowerCase().split(" ")[0])) return cat;
     }
     return null;
 }
 
-// Find matching service
-function findService(msg) {
-    const lower = msg.toLowerCase();
+function findService(m) {
+    const lower = m.toLowerCase();
     for (const cat of Object.keys(CATEGORIES)) {
         for (const svc of CATEGORIES[cat]) {
             if (lower.includes(svc.title.toLowerCase()) || svc.title.toLowerCase().includes(lower)) {
@@ -109,44 +273,60 @@ function findService(msg) {
     return null;
 }
 
-// Find time slot
-function findTimeSlot(msg) {
-    const lower = msg.toLowerCase().replace(/\s/g, "");
-    for (const slot of TIME_SLOTS) {
-        if (lower.includes(slot.toLowerCase().replace(/\s/g, ""))) return slot;
-    }
+function detectLanguage(m) {
+    const lower = m.toLowerCase();
+    if (lower.includes("english") || lower === "en") return "en";
+    if (lower.includes("hindi") || lower.includes("हिंदी") || lower === "hi") return "hi";
+    if (lower.includes("gujarati") || lower.includes("ગુજરાતી") || lower === "gu") return "gu";
     return null;
 }
 
-// Main handler
+function getFormConfig(category) {
+    return FORM_CONFIG[category] || FORM_CONFIG["Body Treatment"];
+}
+
+function getNextFormState(currentState, category) {
+    const config = getFormConfig(category);
+    const flow = ["form_name", "form_city", "form_age"];
+    if (config.needsWeight) flow.push("form_weight");
+    if (config.needsHeight) flow.push("form_height");
+    if (config.specificField) flow.push("form_specific");
+    if (config.photoRequest) flow.push("form_photos");
+    flow.push("form_call_time");
+    flow.push("confirmed");
+
+    const idx = flow.indexOf(currentState);
+    if (idx === -1) return flow[0];
+    if (idx + 1 < flow.length) return flow[idx + 1];
+    return "confirmed";
+}
+
+// ============ MAIN HANDLER ============
 router.post("/", async (req, res) => {
     try {
         const body = req.body;
         const phone = body.from || "";
         const senderName = body.whatsapp?.senderName || "";
         const message = (
+            body.content?.text ||
             body.UserResponse ||
             body.whatsapp?.title ||
-            body.postback?.data ||
-            body.content?.text ||
             body.interactive?.title ||
             body.interactive?.list_reply?.title ||
             body.interactive?.button_reply?.title ||
             body.listReply?.title ||
             body.buttonReply?.title ||
             ""
-        ).toString().trim();
-        console.log("TITLE =", body.whatsapp?.title);
-        console.log("MESSAGE =", message);
-
-        console.log("Full body:", JSON.stringify(body));
+        ).trim();
 
         console.log("Incoming:", phone, message);
+        console.log("Full body:", JSON.stringify(body));
 
-        if (!phone) {
+        if (!phone || !message) {
             return res.status(200).json({ success: true });
         }
-        // Sirf test number pe reply karo
+
+        // Test mode
         const TEST_NUMBERS = ["917820870519"];
         if (!TEST_NUMBERS.includes(phone)) {
             console.log("Skipping non-test number:", phone);
@@ -154,54 +334,73 @@ router.post("/", async (req, res) => {
         }
 
         const convo = await getConvo(phone, senderName);
+        const lang = convo.language || "en";
 
-        // RESET - agar user "hi" bole toh fresh start
+        // ===== RESET on greeting =====
         if (isGreeting(message)) {
-            await updateConvo(phone, { state: "welcome", selected_category: "", selected_service: "", booking_date: "", booking_time: "" });
+            await updateConvo(phone, {
+                state: "language_selection", language: "", selected_category: "", selected_service: "",
+                form_name: "", form_city: "", form_age: "", form_weight: "", form_height: "",
+                form_specific: "", form_photos: "", form_call_time: ""
+            });
 
-            await sendText(phone, "👋 Hi " + (senderName || "there") + "! Welcome to *Celebre Aesthetics* 🌸\n\nWe are Gujarat's leading aesthetic surgery & cosmetic treatment clinic with centers in Surat, Ahmedabad & Rajkot.\n\nI can help you explore our treatments and book a free consultation call.");
-
-            await sendList(phone,
-                "Please select a treatment category to explore:",
-                "Our Services",
-                [{
-                    title: "Treatment Categories",
-                    rows: Object.keys(CATEGORIES).map(cat => ({
-                        title: cat,
-                        description: CATEGORIES[cat].length + " procedures available"
-                    }))
-                }],
-                "Celebre Aesthetics",
-                "Powered by AI"
+            await sendButtons(phone,
+                "Please select your preferred language / कृपया अपनी भाषा चुनें / કૃપા કરીને તમારી ભાષા પસંદ કરો",
+                ["English", "हिंदी", "ગુજરાતી"],
+                "Celebre Aesthetics"
             );
-
-            await updateConvo(phone, { state: "category_selection" });
             return res.status(200).json({ success: true });
         }
 
-        // STATE: category_selection
+        // ===== LANGUAGE SELECTION =====
+        if (convo.state === "language_selection") {
+            const detectedLang = detectLanguage(message);
+            if (detectedLang) {
+                await updateConvo(phone, { language: detectedLang, state: "category_selection" });
+
+                await sendText(phone, msg("welcome", detectedLang, { name: senderName || "there" }));
+
+                await sendList(phone,
+                    msg("select_category", detectedLang),
+                    "Our Services",
+                    [{
+                        title: "Treatment Categories",
+                        rows: Object.keys(CATEGORIES).map(cat => ({
+                            title: cat,
+                            description: CATEGORIES[cat].length + " procedures"
+                        }))
+                    }],
+                    "Celebre Aesthetics"
+                );
+                return res.status(200).json({ success: true });
+            }
+
+            await sendButtons(phone,
+                "Please select a language / कृपया भाषा चुनें / કૃપા કરીને ભાષા પસંદ કરો",
+                ["English", "हिंदी", "ગુજરાતી"],
+                "Celebre Aesthetics"
+            );
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== CATEGORY SELECTION =====
         if (convo.state === "category_selection") {
             const cat = findCategory(message) || message;
             const services = CATEGORIES[cat];
 
             if (services) {
                 if (cat === "Gynecomastia") {
-                    // Single service — seedha info do
                     await updateConvo(phone, { state: "service_info", selected_category: cat, selected_service: "Gynecomastia Surgery" });
-
-                    const aiInfo = await getAIReply("Tell me about Gynecomasia surgery at Celebre Aesthetics", "User selected Gynecomastia");
+                    const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+                    const aiInfo = await getAIReply("Tell me about Gynecomastia surgery at Celebre Aesthetics. Reply in " + aiLang, "User selected Gynecomastia");
                     await sendText(phone, "ℹ️ *Gynecomastia Surgery*\n\n" + aiInfo);
-
-                    await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services"]);
+                    await sendButtons(phone, msg("book_ask", lang), [msg("btn_book", lang), msg("btn_other", lang), msg("btn_ask", lang)], "Celebre Aesthetics");
                     await updateConvo(phone, { state: "booking_ask" });
                 } else {
                     await sendList(phone,
-                        "Here are our " + cat + " options. Please select one:",
+                        msg("select_service", lang, { cat: cat }),
                         cat.split(" ")[0] + " Services",
-                        [{
-                            title: cat,
-                            rows: services
-                        }],
+                        [{ title: cat, rows: services }],
                         cat
                     );
                     await updateConvo(phone, { state: "service_selection", selected_category: cat });
@@ -209,132 +408,217 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
 
-            // Category match nahi hua — AI se handle karo
-            const aiReply = await getAIReply(message, "User is on category selection screen");
+            const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+            const aiReply = await getAIReply(message + ". Reply in " + aiLang, "User is on category selection");
             await sendText(phone, aiReply);
             return res.status(200).json({ success: true });
         }
 
-        // STATE: service_selection
+        // ===== SERVICE SELECTION =====
         if (convo.state === "service_selection") {
             const svc = findService(message);
-
             if (svc) {
                 await updateConvo(phone, { state: "service_info", selected_service: svc.service });
-
-                const aiInfo = await getAIReply(
-                    "Tell me about " + svc.service + " procedure at Celebre Aesthetics",
-                    "User selected " + svc.service + " from " + convo.selected_category
-                );
+                const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+                const aiInfo = await getAIReply("Tell me about " + svc.service + " at Celebre Aesthetics. Reply in " + aiLang, "User selected " + svc.service);
                 await sendText(phone, "ℹ️ *" + svc.service + "*\n\n" + aiInfo);
-
-                await sendButtons(phone, "Would you like to book a free consultation call?", ["Yes, Book a Call", "View Other Services"]);
+                await sendButtons(phone, msg("book_ask", lang), [msg("btn_book", lang), msg("btn_other", lang), msg("btn_ask", lang)], "Celebre Aesthetics");
                 await updateConvo(phone, { state: "booking_ask" });
                 return res.status(200).json({ success: true });
             }
 
-            // Service match nahi hua
-            const aiReply = await getAIReply(message, "User is selecting a service from " + convo.selected_category);
+            const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+            const aiReply = await getAIReply(message + ". Reply in " + aiLang, "User selecting service from " + convo.selected_category);
             await sendText(phone, aiReply);
             return res.status(200).json({ success: true });
         }
 
-        // STATE: booking_ask
+        // ===== BOOKING ASK =====
         if (convo.state === "booking_ask") {
             const lower = message.toLowerCase();
-
-            if (lower.includes("yes") || lower.includes("book")) {
-                await sendText(phone, "Great! 📅 Please type your preferred date for the consultation call.\n\n*Format: 20 June 2026*\n\n(Only future dates accepted. We are available Mon-Sat)");
-                await updateConvo(phone, { state: "date_selection" });
+            if (lower.includes("yes") || lower.includes("book") || lower.includes("हाँ") || lower.includes("હા")) {
+                await sendText(phone, msg("ask_name", lang));
+                await updateConvo(phone, { state: "form_name" });
                 return res.status(200).json({ success: true });
             }
-
-            if (lower.includes("other") || lower.includes("service") || lower.includes("view")) {
-                await sendList(phone,
-                    "Please select a treatment category:",
-                    "Our Services",
-                    [{
-                        title: "Treatment Categories",
-                        rows: Object.keys(CATEGORIES).map(cat => ({
-                            title: cat,
-                            description: CATEGORIES[cat].length + " procedures available"
-                        }))
-                    }],
+            if (lower.includes("other") || lower.includes("service") || lower.includes("view") || lower.includes("अन्य") || lower.includes("અન્ય")) {
+                await sendList(phone, msg("select_category", lang), "Our Services",
+                    [{ title: "Treatment Categories", rows: Object.keys(CATEGORIES).map(cat => ({ title: cat, description: CATEGORIES[cat].length + " procedures" })) }],
                     "Celebre Aesthetics"
                 );
                 await updateConvo(phone, { state: "category_selection", selected_category: "", selected_service: "" });
                 return res.status(200).json({ success: true });
             }
+            if (lower.includes("ask") || lower.includes("question") || lower.includes("सवाल") || lower.includes("પ્રશ્ન")) {
+                const langName = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+                await sendText(phone, lang === "en" ? "Sure! Ask anything about " + (convo.selected_service || "our treatments") + " 😊" : lang === "hi" ? "ज़रूर! " + (convo.selected_service || "हमारी सेवाओं") + " के बारे में कुछ भी पूछें 😊" : "ચોક્કસ! " + (convo.selected_service || "અમારી સેવાઓ") + " વિશે કંઈપણ પૂછો 😊");
+                await updateConvo(phone, { state: "asking_question" });
+                return res.status(200).json({ success: true });
+            }
 
-            // Default
-            const aiReply = await getAIReply(message, "User was asked to book a call for " + convo.selected_service);
+            const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+            const aiReply = await getAIReply(message + ". Reply in " + aiLang, "User was asked to book for " + convo.selected_service);
             await sendText(phone, aiReply);
             return res.status(200).json({ success: true });
         }
-        // STATE: date_selection
-        if (convo.state === "date_selection") {
-            if (isValidFutureDate(message)) {
-                const parsed = new Date(message);
-                const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-                const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-                const formatted = days[parsed.getDay()] + ", " + parsed.getDate() + " " + months[parsed.getMonth()] + " " + parsed.getFullYear();
 
-                await updateConvo(phone, { state: "time_selection", booking_date: formatted });
-
-                await sendList(phone,
-                    "📅 Date selected: *" + formatted + "*\n\n🕐 Please select a time slot:",
-                    "Available Slots",
-                    [{
-                        title: "Time Slots (11AM - 8PM)",
-                        rows: TIME_SLOTS.map(slot => ({
-                            title: slot,
-                            description: "Available"
-                        }))
-                    }],
-                    "Select Time"
-                );
-                return res.status(200).json({ success: true });
-            } else {
-                await sendText(phone, "❌ Please enter a valid future date.\n\n*Format: 20 June 2026*\n\nPast dates are not accepted.");
-                return res.status(200).json({ success: true });
-            }
-        }
-
-        // STATE: time_selection
-        if (convo.state === "time_selection") {
-            const slot = findTimeSlot(message);
-
-            if (slot) {
-                await updateConvo(phone, { state: "confirmed", booking_time: slot });
-
-                const confirmMsg = "✅ *Booking Confirmed!*\n\n" +
-                    "🏥 Service: *" + convo.selected_service + "*\n" +
-                    "📅 Date: *" + convo.booking_date + "*\n" +
-                    "🕐 Time: *" + slot + "*\n\n" +
-                    "Our specialist will call you at your chosen time.\n\n" +
-                    "Thank you for choosing *Celebre Aesthetics*! 💜\n\n" +
-                    "📍 Surat | Ahmedabad | Rajkot\n" +
-                    "🌐 celebre.in\n\n" +
-                    "— Celebre Aesthetics Team";
-
-                await sendText(phone, confirmMsg);
-                return res.status(200).json({ success: true });
-            } else {
-                await sendText(phone, "Please select a valid time from the list (11:00 AM to 8:00 PM).");
-                return res.status(200).json({ success: true });
-            }
-        }
-
-        // STATE: confirmed or any other
-        if (convo.state === "confirmed") {
-            await sendText(phone, "Thank you! Your booking is confirmed. 💜\n\nIf you need anything else, just say *Hi* to start again!");
+        // ===== ASKING QUESTION =====
+        if (convo.state === "asking_question") {
+            const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+            const aiReply = await getAIReply(message + ". Reply in " + aiLang, "User asking about " + (convo.selected_service || "treatments"));
+            await sendText(phone, aiReply);
+            await sendButtons(phone, lang === "en" ? "Anything else?" : lang === "hi" ? "कुछ और?" : "બીજું કંઈ?",
+                [msg("btn_book", lang), msg("btn_other", lang), msg("btn_ask", lang)], "Celebre Aesthetics");
+            await updateConvo(phone, { state: "booking_ask" });
             return res.status(200).json({ success: true });
         }
 
-        // DEFAULT — AI handles
-        const aiReply = await getAIReply(message, "General query");
+        // ===== FORM: NAME =====
+        if (convo.state === "form_name") {
+            await updateConvo(phone, { form_name: message });
+            await sendText(phone, msg("ask_city", lang));
+            await updateConvo(phone, { state: "form_city" });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: CITY =====
+        if (convo.state === "form_city") {
+            await updateConvo(phone, { form_city: message });
+            await sendText(phone, msg("ask_age", lang));
+            await updateConvo(phone, { state: "form_age" });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: AGE =====
+        if (convo.state === "form_age") {
+            await updateConvo(phone, { form_age: message });
+            const config = getFormConfig(convo.selected_category);
+            const nextState = getNextFormState("form_age", convo.selected_category);
+
+            if (nextState === "form_weight") {
+                await sendText(phone, msg("ask_weight", lang));
+            } else if (nextState === "form_specific") {
+                const sf = config.specificField;
+                if (config.specificOptions) {
+                    await sendButtons(phone, msg(MSGS.ask_specific[sf], lang), config.specificOptions, "Celebre Aesthetics");
+                } else {
+                    await sendText(phone, msg(MSGS.ask_specific[sf], lang));
+                }
+            } else if (nextState === "form_photos") {
+                await sendText(phone, msg(MSGS.ask_photos[config.photoType], lang));
+            } else if (nextState === "form_call_time") {
+                await sendText(phone, msg("ask_call_time", lang));
+            }
+            await updateConvo(phone, { state: nextState });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: WEIGHT =====
+        if (convo.state === "form_weight") {
+            await updateConvo(phone, { form_weight: message });
+            const config = getFormConfig(convo.selected_category);
+            const nextState = getNextFormState("form_weight", convo.selected_category);
+
+            if (nextState === "form_height") {
+                await sendText(phone, msg("ask_height", lang));
+            } else if (nextState === "form_specific") {
+                const sf = config.specificField;
+                if (config.specificOptions) {
+                    await sendButtons(phone, msg(MSGS.ask_specific[sf], lang), config.specificOptions, "Celebre Aesthetics");
+                } else {
+                    await sendText(phone, msg(MSGS.ask_specific[sf], lang));
+                }
+            } else if (nextState === "form_photos") {
+                await sendText(phone, msg(MSGS.ask_photos[config.photoType], lang));
+            } else if (nextState === "form_call_time") {
+                await sendText(phone, msg("ask_call_time", lang));
+            }
+            await updateConvo(phone, { state: nextState });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: HEIGHT =====
+        if (convo.state === "form_height") {
+            await updateConvo(phone, { form_height: message });
+            const config = getFormConfig(convo.selected_category);
+            const nextState = getNextFormState("form_height", convo.selected_category);
+
+            if (nextState === "form_specific") {
+                const sf = config.specificField;
+                if (config.specificOptions) {
+                    await sendButtons(phone, msg(MSGS.ask_specific[sf], lang), config.specificOptions, "Celebre Aesthetics");
+                } else {
+                    await sendText(phone, msg(MSGS.ask_specific[sf], lang));
+                }
+            } else if (nextState === "form_photos") {
+                await sendText(phone, msg(MSGS.ask_photos[config.photoType], lang));
+            } else if (nextState === "form_call_time") {
+                await sendText(phone, msg("ask_call_time", lang));
+            }
+            await updateConvo(phone, { state: nextState });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: SPECIFIC =====
+        if (convo.state === "form_specific") {
+            await updateConvo(phone, { form_specific: message });
+            const config = getFormConfig(convo.selected_category);
+            const nextState = getNextFormState("form_specific", convo.selected_category);
+
+            if (nextState === "form_photos") {
+                await sendText(phone, msg(MSGS.ask_photos[config.photoType], lang));
+            } else if (nextState === "form_call_time") {
+                await sendText(phone, msg("ask_call_time", lang));
+            }
+            await updateConvo(phone, { state: nextState });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: PHOTOS =====
+        if (convo.state === "form_photos") {
+            await updateConvo(phone, { form_photos: "received" });
+            await sendText(phone, msg("ask_call_time", lang));
+            await updateConvo(phone, { state: "form_call_time" });
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== FORM: CALL TIME =====
+        if (convo.state === "form_call_time") {
+            await updateConvo(phone, { form_call_time: message, state: "confirmed" });
+
+            const config = getFormConfig(convo.selected_category);
+            let extra = "";
+            if (config.needsWeight) extra += "⚖️ " + (lang === "en" ? "Weight" : lang === "hi" ? "वज़न" : "વજન") + ": *" + convo.form_weight + "*\n";
+            if (config.needsHeight) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊંચાઈ") + ": *" + convo.form_height + "*\n";
+            if (config.specificField) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વિગતો") + ": *" + convo.form_specific + "*\n";
+            if (config.photoRequest) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ફોટો") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ્રાપ્ત") + "*\n";
+
+            const confirmText = msg("confirmed", lang, {
+                service: convo.selected_service,
+                name: convo.form_name,
+                city: convo.form_city,
+                age: convo.form_age,
+                extra: extra,
+                time: message
+            });
+
+            await sendText(phone, confirmText);
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== CONFIRMED =====
+        if (convo.state === "confirmed") {
+            const t = lang === "en" ? "Thank you! Your request is confirmed. 💜\nSay *Celebre* to start again!" :
+                lang === "hi" ? "धन्यवाद! आपकी रिक्वेस्ट कन्फर्म है। 💜\nफिर से शुरू करने के लिए *Celebre* भेजें!" :
+                    "આભાર! તમારી રિક્વેસ્ટ કન્ફર્મ છે. 💜\nફરીથી શરૂ કરવા *Celebre* મોકલો!";
+            await sendText(phone, t);
+            return res.status(200).json({ success: true });
+        }
+
+        // ===== DEFAULT =====
+        const aiLang = lang === "hi" ? "Hindi" : lang === "gu" ? "Gujarati" : "English";
+        const aiReply = await getAIReply(message + ". Reply in " + aiLang, "General query");
         await sendText(phone, aiReply);
-        await sendButtons(phone, "How can I help you further?", ["View Services", "Book a Call"]);
         return res.status(200).json({ success: true });
 
     } catch (error) {
