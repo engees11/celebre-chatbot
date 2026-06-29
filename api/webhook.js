@@ -258,8 +258,8 @@ router.post("/", async (req, res) => {
         console.log("Incoming:", phone, "|", message, "| media:", media);
         if (!phone || !message) return res.status(200).json({ success: true });
 
-        const TEST = ["917820870519"];
-        if (!TEST.includes(phone)) { console.log("Skip:", phone); return res.status(200).json({ success: true }); }
+        //const TEST = ["917820870519"];
+        //if (!TEST.includes(phone)) { console.log("Skip:", phone); return res.status(200).json({ success: true }); }
 
         const convo = await getC(phone, senderName);
         const lang = convo.language || "en";
