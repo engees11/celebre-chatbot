@@ -1,4 +1,4 @@
-// api/webhook.js - v10 Correct Gujarati
+// api/webhook.js - v11 City Validation + Link Removed
 
 const express = require("express");
 const router = express.Router();
@@ -66,8 +66,7 @@ const SERVICE_FORMS = {
     "Laser Hair Removal": {
         fields: ["form_name", "form_city", "form_age", "form_specific"],
         specific: { en: "📍 *Which area do you want treated?* (Face, Arms, Legs, Underarms, Full Body, etc.):", hi: "📍 *किस हिस्से का ट्रीटमेंट चाहते हैं?* (चेहरा, बाहें, पैर, अंडरआर्म्स, फुल बॉडी आदि):", gu: "📍 *ક્યા ભાગમાંથી વાળ દૂર કરવા છે?* (ચહેરો, હાથ, પગ, અન્ડરઆર્મ, ફુલ બૉડી વગેરે):" },
-        specificOptions: null,
-        photo: null
+        specificOptions: null, photo: null
     },
     "Rhinoplasty": {
         fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
@@ -94,28 +93,23 @@ const SERVICE_FORMS = {
         photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેરાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Brow Lift": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
-        photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેરાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
+        photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેरાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Dimple Creation": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
         photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેરાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Jawline Creation": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
-        photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેરાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
+        photo: { en: "📸 Share *Clear Face Photos* (Front & Side):", hi: "📸 चेहरे की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેরાના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Double Chin Reduction": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
         photo: { en: "📸 Share *Clear Face & Chin Photos* (Front & Side):", hi: "📸 चेहरे और ठुड्डी की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 ચહેરા અને ચિનના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Otoplasty": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
         photo: { en: "📸 Share *Clear Photos* of your ears (Front & Side):", hi: "📸 कानों की *साफ फोटो* भेजें (सामने और साइड):", gu: "📸 કાનના *સ્પષ્ટ ફોટો* મોકલો (આગળ અને સાઈડ):" }
     },
     "Breast Augmentation": { fields: ["form_name", "form_city", "form_age", "form_weight", "form_height"], specific: null, specificOptions: null, photo: null },
@@ -136,34 +130,31 @@ const SERVICE_FORMS = {
     "Gynecomastia Surgery": {
         fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_photos"],
         specific: null, specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Chest Photos*:", hi: "📸 *2-3 छाती की साफ फोटो* भेजें:", gu: "📸 *2-3 છાતીના સ્પષ્ટ ફોટો* મોકલો:" }
+        photo: { en: "📸 Share *2-3 Clear Chest Photos*:", hi: "📸 *2-3 छाती की साफ फोटो* भेजें:", gu: "📸 *2-3 છાતીના સ્પષ્ટ ફોટો* મોકलો:" }
     },
     "Skin Rejuvenation": {
         fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
-        specific: { en: "🎯 *Skin Concern:* (Wrinkles, Dull Skin, Anti-Aging, Fine Lines, Glow, etc.):", hi: "🎯 *त्वचा की समस्या:* (झुर्रियां, बेजान त्वचा, एंटी-एजिंग, फाइन लाइन्स आदि):", gu: "🎯 *ત્વચાની સમસ્યા:* (કરચલી, નિસ્તેજ ત્વચા, અસમાન રંગ, ફાઈન લાઈન્સ વગેરે):" },
+        specific: { en: "🎯 *Skin Concern:* (Wrinkles, Dull Skin, Anti-Aging, Fine Lines, Glow, etc.):", hi: "🎯 *त्वचा की समस्या:* (झुर्रियां, बेजान त्वचा, एंटी-एजिंग, फाइन लाइन्स आदि):", gu: "🎯 *ત્વચાની સમસ્યા:* (કरचली, નिस्तेज ત્વচा, અसमान रंग, ફाईन लाईन्स वगेरे):" },
         specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Photos* of the concerned area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અસરગ્રસ્ત ભાગના *2-3 સ્પષ્ટ ફોટો* મોકલો:" }
+        photo: { en: "📸 Share *2-3 Clear Photos* of the concerned area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અસरગ્રસ્ત ભагना *2-3 સ્પષ્ટ ફоटो* मोकलो:" }
     },
     "Acne Scar Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અસરગ્રસ્ત ભાગના *2-3 સ્પષ્ટ ફોટો* મોકલો:" }
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
+        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અसरગ્રસ્ત ભагна *2-3 સ્પષ્ટ ફоटо* मोकलो:" }
     },
     "Skin Pigmentation": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અસરગ્રસ્ત ભાગના *2-3 સ્પષ્ટ ફોટો* મોકલો:" }
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
+        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અसरગ્રસ્ત ભагna *2-3 સ્પષ્ટ ફоटо* मोकलो:" }
     },
     "Scar Revision": {
         fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
-        specific: { en: "🎯 *Scar Details:* (Location on body, Old or New scar, Type, etc.):", hi: "🎯 *दाग की जानकारी:* (शरीर पर कहाँ, पुराना या नया दाग, प्रकार आदि):", gu: "🎯 *ડાઘની માહિતી:* (શરીર પર ક્યાં, જૂનો કે નવો ડાઘ, પ્રકાર વગેરે):" },
+        specific: { en: "🎯 *Scar Details:* (Location on body, Old or New scar, Type, etc.):", hi: "🎯 *दाग की जानकारी:* (शरीर पर कहाँ, पुराना या नया दाग, प्रकार आदि):", gu: "🎯 *ડाઘनी माहिती:* (शरीर पर क्यां, जुनो के नवो डाघ, प्रकार वगेरे):" },
         specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Photos* of the scar:", hi: "📸 दाग की *2-3 साफ फोटो* भेजें:", gu: "📸 ડાઘના *2-3 સ્પષ્ટ ફોટો* મોકલો:" }
+        photo: { en: "📸 Share *2-3 Clear Photos* of the scar:", hi: "📸 दाग की *2-3 साफ फोटो* भेजें:", gu: "📸 ડाघना *2-3 સ્પષ્ટ ફоटо* मोकलो:" }
     },
     "Vitiligo": {
-        fields: ["form_name", "form_city", "form_age", "form_photos"],
-        specific: null, specificOptions: null,
-        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અસરગ્રસ્ત ભાગના *2-3 સ્પષ્ટ ફોટો* મોકલો:" }
+        fields: ["form_name", "form_city", "form_age", "form_photos"], specific: null, specificOptions: null,
+        photo: { en: "📸 Share *2-3 Clear Photos* of the affected area:", hi: "📸 प्रभावित हिस्से की *2-3 साफ फोटो* भेजें:", gu: "📸 અसरગ્રસ્ત ભагna *2-3 સ્પષ્ટ ફоटо* मोकलो:" }
     }
 };
 
@@ -171,43 +162,46 @@ function getSF(svc) { return SERVICE_FORMS[svc] || { fields: ["form_name", "form
 function proc(l) { return l === "hi" ? " प्रक्रियाएं" : l === "gu" ? " સારવાર" : " procedures"; }
 function catRows(l) { return Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + proc(l) })); }
 
+// ============ INDIAN CITIES VALIDATION ============
+const INDIAN_CITIES = new Set(["surat", "ahmedabad", "rajkot", "vadodara", "bhavnagar", "jamnagar", "gandhinagar", "anand", "nadiad", "mehsana", "morbi", "junagadh", "bharuch", "navsari", "valsad", "porbandar", "amreli", "bhuj", "vapi", "ankleshwar", "kutch", "dwarka", "botad", "silvassa", "mumbai", "pune", "nagpur", "nashik", "aurangabad", "solapur", "kolhapur", "thane", "navi mumbai", "amravati", "akola", "latur", "dhule", "jalgaon", "satara", "sangli", "ratnagiri", "alibag", "palghar", "vasai", "virar", "jaipur", "jodhpur", "udaipur", "kota", "bikaner", "ajmer", "bharatpur", "alwar", "sikar", "pali", "barmer", "chittorgarh", "bhilwara", "jhunjhunu", "delhi", "new delhi", "noida", "gurgaon", "gurugram", "faridabad", "ghaziabad", "greater noida", "lucknow", "kanpur", "agra", "varanasi", "prayagraj", "allahabad", "mathura", "vrindavan", "aligarh", "bareilly", "moradabad", "saharanpur", "gorakhpur", "jhansi", "firozabad", "muzaffarnagar", "rampur", "shahjahanpur", "hapur", "etawah", "meerut", "bhopal", "indore", "jabalpur", "gwalior", "ujjain", "sagar", "rewa", "satna", "dewas", "ratlam", "mandsaur", "chhindwara", "burhanpur", "khargone", "vidisha", "hoshangabad", "itarsi", "bengaluru", "bangalore", "mysuru", "mysore", "hubli", "dharwad", "belagavi", "belgaum", "mangaluru", "mangalore", "tumkur", "davangere", "ballari", "bellary", "shimoga", "udupi", "bidar", "kalaburagi", "gulbarga", "hassan", "mandya", "chennai", "coimbatore", "madurai", "tiruchirappalli", "trichy", "tiruppur", "salem", "erode", "vellore", "tirunelveli", "thoothukudi", "dindigul", "thanjavur", "ranipet", "sivakasi", "karur", "hosur", "nagercoil", "kanchipuram", "cuddalore", "visakhapatnam", "vijayawada", "guntur", "nellore", "kurnool", "tirupati", "kakinada", "rajahmundry", "kadapa", "anantapur", "eluru", "ongole", "machilipatnam", "chittoor", "hyderabad", "warangal", "nizamabad", "karimnagar", "khammam", "mahbubnagar", "nalgonda", "adilabad", "secunderabad", "sangareddy", "suryapet", "thiruvananthapuram", "kochi", "kozhikode", "calicut", "thrissur", "kollam", "kannur", "alappuzha", "palakkad", "malappuram", "kottayam", "kasaragod", "pathanamthitta", "kolkata", "howrah", "durgapur", "asansol", "siliguri", "bardhaman", "malda", "murshidabad", "kharagpur", "haldia", "krishnanagar", "barasat", "patna", "gaya", "bhagalpur", "muzaffarpur", "purnia", "darbhanga", "arrah", "begusarai", "katihar", "munger", "chapra", "hajipur", "samastipur", "sitamarhi", "motihari", "ludhiana", "amritsar", "jalandhar", "patiala", "bathinda", "mohali", "pathankot", "hoshiarpur", "batala", "moga", "firozpur", "kapurthala", "gurdaspur", "barnala", "ambala", "yamunanagar", "rohtak", "hisar", "karnal", "sonipat", "panchkula", "bhiwani", "sirsa", "rewari", "jhajjar", "shimla", "dharamshala", "mandi", "solan", "kangra", "kullu", "manali", "baddi", "palampur", "bilaspur", "hamirpur", "una", "chamba", "nahan", "dehradun", "haridwar", "roorkee", "rishikesh", "nainital", "haldwani", "kashipur", "rudrapur", "mussoorie", "kotdwar", "ramnagar", "pithoragarh", "almora", "tehri", "ranchi", "jamshedpur", "dhanbad", "bokaro", "hazaribagh", "deoghar", "giridih", "ramgarh", "chaibasa", "dumka", "bhubaneswar", "cuttack", "rourkela", "brahmapur", "sambalpur", "puri", "balasore", "baripada", "jharsuguda", "angul", "paradip", "raipur", "bhilai", "bilaspur chhattisgarh", "durg", "korba", "rajnandgaon", "jagdalpur", "ambikapur", "raigarh", "mahasamund", "dhamtari", "guwahati", "silchar", "dibrugarh", "jorhat", "tezpur", "nagaon", "tinsukia", "bongaigaon", "goalpara", "panaji", "margao", "vasco da gama", "mapusa", "ponda", "srinagar", "jammu", "anantnag", "baramulla", "sopore", "udhampur", "kathua", "rajouri", "doda", "chandigarh", "puducherry", "pondicherry", "imphal", "shillong", "aizawl", "kohima", "itanagar", "agartala", "gangtok", "dispur", "pasighat", "leh", "kargil", "port blair"]);
+
 const TIME_SLOTS = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM", "7:00 PM", "8:00 PM"];
 
 const MSG = {
     welcome: {
         en: "👋 Hi {name}! Welcome to *Celebre Aesthetics* 🌸\n\nGujarat's leading aesthetic clinic — Surat, Ahmedabad & Rajkot.\n\nLet me help you explore treatments and book a free consultation.",
         hi: "👋 नमस्ते {name}! *Celebre Aesthetics* में स्वागत है 🌸\n\nगुजरात की अग्रणी क्लिनिक — सूरत, अहमदाबाद, राजकोट।\n\nट्रीटमेंट जानने और फ्री कंसल्टेशन बुक करने में मदद करता/करती हूँ।",
-        gu: "👋 નમસ્તે {name}! *Celebre Aesthetics* માં સ્વાગત છે 🌸\n\nગુજરાતની અગ્રણી ક્લિનિક — સુરત, અમદાવાદ, રાજકોટ.\n\nટ્રીટમેન્ટ જાણવા અને ફ્રી કન્સલ્ટેશન બુક કરવામાં મદદ કરું છું."
+        gu: "👋 નમસ્તે {name}! *Celebre Aesthetics* માં સ્વાગત છે 🌸\n\nગુજрातनी અગ્રણী ક્લિnिक — સुरत, અмдावाд, राजकोट.\n\nТрीटмेन्ट जाणवा अने फ्री कन्सल्टेशन बुक करवामां मदद करुं छुं."
     },
-    select_cat: { en: "Please select a treatment category:", hi: "कृपया ट्रीटमेंट कैटेगरी चुनें:", gu: "કૃપા કરીને ટ્રીટમેન્ટ કેટેગરી પસંદ કરો:" },
-    select_svc: { en: "Here are our {cat} options:", hi: "{cat} के विकल्प:", gu: "{cat} ના વિકલ્પો:" },
-    form_start: { en: "To help our specialist prepare, please answer a few quick questions. 📋", hi: "कंसल्टेशन के लिए कुछ सवालों के जवाब दें। 📋", gu: "કન્સલ્ટેશન માટે થોડા પ્રશ્નોના જવાબ આપો. 📋" },
+    select_cat: { en: "Please select a treatment category:", hi: "कृपया ट्रीटमेंट कैटेगरी चुनें:", gu: "કृपा करीने ट्रीटमेन्ट केटेगरी पसंद करो:" },
+    select_svc: { en: "Here are our {cat} options:", hi: "{cat} के विकल्प:", gu: "{cat} ના વিकल्पो:" },
+    form_start: { en: "To help our specialist prepare, please answer a few quick questions. 📋", hi: "कंसल्टेशन के लिए कुछ सवालों के जवाब दें। 📋", gu: "કन्सल्टेशन माटे थोडा प्रश्नोना जवाब आपो. 📋" },
     ask_name: { en: "👤 Your *Name*:", hi: "👤 आपका *नाम*:", gu: "👤 તમારું *નામ*:" },
-    ask_city: { en: "📍 Your *City / Location*:", hi: "📍 आपका *शहर / लोकेशन*:", gu: "📍 તમારું *શહેર / સ્થાન*:" },
-    ask_age: { en: "🎂 Your *Age*:", hi: "🎂 आपकी *उम्र*:", gu: "🎂 તમારી *ઉંમર*:" },
-    ask_weight: { en: "⚖️ Your *Approx. Weight* (kg):", hi: "⚖️ आपका *अनुमानित वज़न* (kg):", gu: "⚖️ તમારું *અંદાજિત વજન* (kg):" },
-    ask_height: { en: "📏 Your *Height*:", hi: "📏 आपकी *ऊंचाई*:", gu: "📏 તમારી *ઊંચાઈ*:" },
-    book_ask: { en: "Would you like to book a consultation date?", hi: "क्या आप कंसल्टेशन डेट बुक करना चाहेंगे?", gu: "શું તમે કન્સલ્ટેશન ડેટ બુક કરવા માંગો છો?" },
-    ask_date: { en: "📅 Type your preferred *date*.\nFormat: *25 June 2026*\n(Future dates only)", hi: "📅 *तारीख* लिखें।\nफॉर्मेट: *25 June 2026*\n(सिर्फ आने वाली तारीख)", gu: "📅 *તારીખ* લખો.\nફોર્મેટ: *25 June 2026*\n(માત્ર ભવિષ્યની તારીખ)" },
-    bad_date: { en: "❌ Enter a valid *future date*.\nFormat: *25 June 2026*", hi: "❌ सही *भविष्य की तारीख* लिखें।\nफॉर्मेट: *25 June 2026*", gu: "❌ યોગ્ય *ભવિષ્યની તારીખ* લખો.\nફોર્મેટ: *25 June 2026*" },
-    select_time: { en: "🕐 Select a time slot:", hi: "🕐 समय चुनें:", gu: "🕐 સમય પસંદ કરો:" },
+    ask_city: { en: "📍 Your *City / Location*:", hi: "📍 आपका *शहर / लोकेशन*:", gu: "📍 તмарुं *शहेर / स्थान*:" },
+    ask_age: { en: "🎂 Your *Age*:", hi: "🎂 आपकी *उम्र*:", gu: "🎂 તмарी *ऊंमर*:" },
+    ask_weight: { en: "⚖️ Your *Approx. Weight* (kg):", hi: "⚖️ आपका *अनुमानित वज़न* (kg):", gu: "⚖️ તмарुं *अंदाजित वजन* (kg):" },
+    ask_height: { en: "📏 Your *Height*:", hi: "📏 आपकी *ऊंचाई*:", gu: "📏 તмарी *ऊंचाई*:" },
+    book_ask: { en: "Would you like to book a consultation date?", hi: "क्या आप कंसल्टेशन डेट बुक करना चाहेंगे?", gu: "शुं तमे कन्सल्टेशन डेट बुक करवा माँगो छो?" },
+    ask_date: { en: "📅 Type your preferred *date*.\nFormat: *25 June 2026*\n(Future dates only)", hi: "📅 *तारीख* लिखें।\nफॉर्मेट: *25 June 2026*\n(सिर्फ आने वाली तारीख)", gu: "📅 *तारीख* लखो.\nफोर्मेट: *25 June 2026*\n(मात्र भविष्यनी तारीख)" },
+    bad_date: { en: "❌ Enter a valid *future date*.\nFormat: *25 June 2026*", hi: "❌ सही *भविष्य की तारीख* लिखें।\nफॉर्मेट: *25 June 2026*", gu: "❌ योग्य *भविष्यनी तारीख* लखो.\nफोर्मेट: *25 June 2026*" },
+    select_time: { en: "🕐 Select a time slot:", hi: "🕐 समय चुनें:", gu: "🕐 સमय पसंद करो:" },
     confirmed: {
         en: "✅ *Consultation Booked!*\n\n🏥 Service: *{service}*\n👤 Name: *{name}*\n📍 City: *{city}*\n🎂 Age: *{age}*\n{extra}📅 Date: *{date}*\n🕐 Time: *{time}*\n\nOur specialist will call you soon.\nThank you! 💜\n\n📍 Surat | Ahmedabad | Rajkot",
         hi: "✅ *कंसल्टेशन बुक!*\n\n🏥 सेवा: *{service}*\n👤 नाम: *{name}*\n📍 शहर: *{city}*\n🎂 उम्र: *{age}*\n{extra}📅 तारीख: *{date}*\n🕐 समय: *{time}*\n\nविशेषज्ञ जल्द संपर्क करेंगे।\nधन्यवाद! 💜\n\n📍 सूरत | अहमदाबाद | राजकोट",
-        gu: "✅ *કન્સલ્ટેશન બુક!*\n\n🏥 સેવા: *{service}*\n👤 નામ: *{name}*\n📍 શહેર: *{city}*\n🎂 ઉંમર: *{age}*\n{extra}📅 તારીખ: *{date}*\n🕐 સમય: *{time}*\n\nનિષ્ણાત ટૂંક સમયમાં સંપર્ક કરશે.\nઆભાર! 💜\n\n📍 સુરત | અમદાવાદ | રાજકોટ"
+        gu: "✅ *કн्सल्टेशन बुक!*\n\n🏥 સेवा: *{service}*\n👤 Нाम: *{name}*\n📍 Шहेर: *{city}*\n🎂 ऊंमर: *{age}*\n{extra}📅 Тарीख: *{date}*\n🕐 Сमय: *{time}*\n\nनिष्णात टूंक समयमां संपर्क करशे.\nआभार! 💜\n\n📍 सुरत | अमदावाद | राजकोट"
     },
-    again: { en: "Say *Celebre* to start again!", hi: "*Celebre* भेजें फिर से शुरू करने के लिए!", gu: "*Celebre* મોકલો ફરીથી શરૂ કરવા!" },
-    btn_book: { en: "Yes, Book Now", hi: "हाँ, बुक करें", gu: "હા, બુક કરો" },
-    btn_other: { en: "Other Services", hi: "अन्य सेवाएं", gu: "અન્ય સેવાઓ" },
-    v_name: { en: "❌ Enter a valid *name* (letters only):", hi: "❌ सही *नाम* लिखें (सिर्फ अक्षर):", gu: "❌ યોગ્ય *નામ* લખો (માત્ર અક્ષરો):" },
-    v_city: { en: "❌ Enter a valid *city name*:", hi: "❌ सही *शहर का नाम* लिखें:", gu: "❌ યોગ્ય *શહેરનું નામ* લખો:" },
-    v_age: { en: "❌ Enter valid *age* (10-100):", hi: "❌ सही *उम्र* लिखें (10-100):", gu: "❌ યોગ્ય *ઉંમર* લખો (10-100):" },
-    v_weight: { en: "❌ Enter valid *weight* in kg (20-300):", hi: "❌ सही *वज़न* kg में लिखें (20-300):", gu: "❌ યોગ્ય *વજન* kg માં લખો (20-300):" },
-    v_height: { en: "❌ Enter valid *height* (e.g. 5'6 or 168cm):", hi: "❌ सही *ऊंचाई* लिखें:", gu: "❌ યોગ્ય *ઊંચાઈ* લખો:" },
-    v_specific: { en: "❌ Please describe in at least a few words:", hi: "❌ कम से कम कुछ शब्दों में बताएं:", gu: "❌ ઓછામાં ઓછા થોડા શબ્દોમાં જણાવો:" },
-    v_photo: { en: "❌ Please send a *photo/image*, not text 📸", hi: "❌ *फोटो* भेजें, टेक्स्ट नहीं 📸", gu: "❌ *ફોટો* મોકલો, ટેક્સ્ટ નહીં 📸" },
-    force_answer: { en: "⚠️ Please answer the current question first.", hi: "⚠️ कृपया पहले मौजूदा सवाल का जवाब दें।", gu: "⚠️ કૃપા કરીને પહેલા હાલના પ્રશ્નનો જવાબ આપો." },
-    force_select: { en: "⚠️ Please select an option from above.", hi: "⚠️ कृपया ऊपर दिए गए विकल्प में से चुनें।", gu: "⚠️ કૃપા કરીને ઉપરના વિકલ્પમાંથી પસંદ કરો." }
+    again: { en: "Say *Celebre* to start again!", hi: "*Celebre* भेजें फिर से शुरू करने के लिए!", gu: "*Celebre* मोकलो फरीथी शरू करवा!" },
+    btn_book: { en: "Yes, Book Now", hi: "हाँ, बुक करें", gu: "हा, बुक करो" },
+    btn_other: { en: "Other Services", hi: "अन्य सेवाएं", gu: "अन्य सेवाओ" },
+    v_name: { en: "❌ Enter a valid *name* (letters only):", hi: "❌ सही *नाम* लिखें (सिर्फ अक्षर):", gu: "❌ योग्य *नाम* लखो (मात्र अक्षरो):" },
+    v_city: { en: "❌ Please enter a valid *Indian city name*:", hi: "❌ कृपया सही *भारतीय शहर का नाम* लिखें:", gu: "❌ કृपया योग्य *भारतीय शहेरनुं नाम* लखो:" },
+    v_age: { en: "❌ Enter valid *age* (10-100):", hi: "❌ सही *उम्र* लिखें (10-100):", gu: "❌ योग्य *ऊंमर* लखो (10-100):" },
+    v_weight: { en: "❌ Enter valid *weight* in kg (20-300):", hi: "❌ सही *वज़न* kg में लिखें (20-300):", gu: "❌ योग्य *वजन* kg मां लखो (20-300):" },
+    v_height: { en: "❌ Enter valid *height* (e.g. 5'6 or 168cm):", hi: "❌ सही *ऊंचाई* लिखें:", gu: "❌ योग्य *ऊंचाई* लखो:" },
+    v_specific: { en: "❌ Please describe in at least a few words:", hi: "❌ कम से कम कुछ शब्दों में बताएं:", gu: "❌ ઓछामां ओछा थोडा शब्दोमां जणावो:" },
+    v_photo: { en: "❌ Please send a *photo/image*, not text 📸", hi: "❌ *फोटो* भेजें, टेक्स्ट नहीं 📸", gu: "❌ *ফोटо* मोकलो, टेक्स्ट नहीं 📸" },
+    force_answer: { en: "⚠️ Please answer the current question first.", hi: "⚠️ कृपया पहले मौजूदा सवाल का जवाब दें।", gu: "⚠️ कृपा करीने पहेला हालना प्रश्ननो जवाब आपो." },
+    force_select: { en: "⚠️ Please select an option from above.", hi: "⚠️ कृपया ऊपर दिए गए विकल्प में से चुनें।", gu: "⚠️ कृपा करीने उपरना विकल्पमांथी पसंद करो." }
 };
 
 function t(k, l, r) { let s = typeof k === "object" ? (k[l] || k["en"] || "") : (MSG[k]?.[l] || MSG[k]?.["en"] || ""); if (r) { for (const x in r) s = s.replace(new RegExp("\\{" + x + "\\}", "g"), r[x]); } return s; }
@@ -223,7 +217,16 @@ function validDate(s) { const p = new Date(s); if (isNaN(p.getTime())) return fa
 function fmtDate(s) { const p = new Date(s); const d = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]; const m = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]; return d[p.getDay()] + ", " + p.getDate() + " " + m[p.getMonth()] + " " + p.getFullYear(); }
 function findTime(m) { const l = m.toLowerCase().replace(/\s/g, ""); for (const s of TIME_SLOTS) { if (l.includes(s.toLowerCase().replace(/\s/g, ""))) return s; } return null; }
 function isValidName(m) { return m.length >= 2 && /^[a-zA-Z\u0900-\u097F\u0A80-\u0AFF\s.]+$/.test(m); }
-function isValidCity(m) { return m.length >= 2 && /^[a-zA-Z\u0900-\u097F\u0A80-\u0AFF\s,.-]+$/.test(m); }
+function isValidCity(m) {
+    if (m.length < 2) return false;
+    if (!/^[a-zA-Z\u0900-\u097F\u0A80-\u0AFF\s,.-]+$/.test(m)) return false;
+    const lower = m.toLowerCase().trim();
+    if (INDIAN_CITIES.has(lower)) return true;
+    for (const city of INDIAN_CITIES) {
+        if (lower.includes(city) || city.includes(lower)) return true;
+    }
+    return false;
+}
 function extractMessage(body, media) { const waTitle = body.whatsapp?.title || ""; const postback = body.postback?.data || ""; const interactiveTitle = body.interactive?.title || body.interactive?.list_reply?.title || body.interactive?.button_reply?.title || ""; const listReply = body.listReply?.title || body.buttonReply?.title || ""; const textContent = body.content?.text || body.UserResponse || ""; return (waTitle || postback || interactiveTitle || listReply || textContent || (media ? "__PHOTO__" : "")).trim(); }
 
 async function sendFQ(ph, state, svc, lang) {
@@ -255,7 +258,7 @@ router.post("/", async (req, res) => {
         console.log("Incoming:", phone, "|", message, "| media:", media);
         if (!phone || !message) return res.status(200).json({ success: true });
 
-        const TEST = ["917820870519", "918758422007"];
+        const TEST = ["917820870519"];
         if (!TEST.includes(phone)) { console.log("Skip:", phone); return res.status(200).json({ success: true }); }
 
         const convo = await getC(phone, senderName);
@@ -264,7 +267,7 @@ router.post("/", async (req, res) => {
         // RESET
         if (isGreet(message)) {
             await up(phone, { state: "language_selection", language: "", selected_category: "", selected_service: "", form_name: "", form_city: "", form_age: "", form_weight: "", form_height: "", form_specific: "", form_photos: "", booking_date: "", booking_time: "" });
-            await sendButtons(phone, "Select your language / भाषा चुनें / ભાષા પસંદ કરો", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
+            await sendButtons(phone, "Select your language / भाषा चुनें / ભાષા પсंद करो", ["English", "हिंदी", "ગуजраТी"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
@@ -278,7 +281,7 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
-            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
+            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગуजраТী"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
@@ -361,12 +364,12 @@ router.post("/", async (req, res) => {
         // BOOKING ASK
         if (convo.state === "booking_ask") {
             const l = message.toLowerCase();
-            if (l.includes("yes") || l.includes("book") || l.includes("हाँ") || l.includes("हां") || l.includes("बुक") || l.includes("हा") || l.includes("બુક") || l.includes("બુк")) {
+            if (l.includes("yes") || l.includes("book") || l.includes("हाँ") || l.includes("हां") || l.includes("बुक") || l.includes("हा") || l.includes("બुक")) {
                 await sendText(phone, t("ask_date", lang));
                 await up(phone, { state: "date_selection" });
                 return res.status(200).json({ success: true });
             }
-            if (l.includes("other") || l.includes("service") || l.includes("अन्य") || l.includes("सेव") || l.includes("અન્ય") || l.includes("સેવ")) {
+            if (l.includes("other") || l.includes("service") || l.includes("अन्य") || l.includes("सेव") || l.includes("અน्य") || l.includes("સेव")) {
                 await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: catRows(lang) }], "Celebre Aesthetics");
                 await up(phone, { state: "category_selection", selected_category: "", selected_service: "" });
                 return res.status(200).json({ success: true });
@@ -382,8 +385,8 @@ router.post("/", async (req, res) => {
                 const fd = fmtDate(message);
                 await up(phone, { booking_date: fd, state: "time_selection" });
                 await sendList(phone, t("select_time", lang) + "\n\n📅 " + fd,
-                    lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો",
-                    [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
+                    lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સमय पसंद करो",
+                    [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉपलब्ध", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
                     "Celebre Aesthetics");
                 return res.status(200).json({ success: true });
             }
@@ -400,17 +403,17 @@ router.post("/", async (req, res) => {
                 const latestSF = getSF(latest.selected_service);
                 const latestFields = latestSF.fields;
                 let extra = "";
-                if (latestFields.includes("form_weight")) extra += "⚖️ " + (lang === "en" ? "Weight" : lang === "hi" ? "वज़न" : "વજન") + ": *" + latest.form_weight + "*\n";
-                if (latestFields.includes("form_height")) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊંચાઈ") + ": *" + latest.form_height + "*\n";
-                if (latestSF.specific && latest.form_specific) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વિગતો") + ": *" + latest.form_specific + "*\n";
-                if (latestSF.photo) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ફોટો") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ્રાપ્ત") + "*\n";
+                if (latestFields.includes("form_weight")) extra += "⚖️ " + (lang === "en" ? "Weight" : lang === "hi" ? "वज़न" : "વजन") + ": *" + latest.form_weight + "*\n";
+                if (latestFields.includes("form_height")) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊंचाई") + ": *" + latest.form_height + "*\n";
+                if (latestSF.specific && latest.form_specific) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વिगत") + ": *" + latest.form_specific + "*\n";
+                if (latestSF.photo) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ફोटो") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ्राप्त") + "*\n";
                 await sendText(phone, t("confirmed", lang, { service: latest.selected_service, name: latest.form_name, city: latest.form_city, age: latest.form_age, extra, date: latest.booking_date, time: slot }));
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
             await sendList(phone, t("select_time", lang),
-                lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો",
-                [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
+                lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સमय पसंद करो",
+                [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉपलब्ध", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
                 "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
