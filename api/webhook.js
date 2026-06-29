@@ -239,7 +239,7 @@ router.post("/", async (req, res) => {
 
         // DATE
         if (convo.state === "date_selection") {
-            if (validDate(message)) { const fd = fmtDate(message); await up(phone, { booking_date: fd, state: "time_selection" }); await sendList(phone, t("select_time", lang) + "\n\n📅 " + fd, lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "" })) }], "Celebre Aesthetics"); return res.status(200).json({ success: true }); }
+            if (validDate(message)) { const fd = fmtDate(message); await up(phone, { booking_date: fd, state: "time_selection" }); await sendList(phone, t("select_time", lang) + "\n\n📅 " + fd, lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }], "Celebre Aesthetics"); return res.status(200).json({ success: true }); }
             await sendText(phone, t("bad_date", lang)); return res.status(200).json({ success: true });
         }
 
@@ -261,7 +261,7 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
-            await sendList(phone, t("select_time", lang), lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "" })) }], "Celebre Aesthetics");
+            await sendList(phone, t("select_time", lang), lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
