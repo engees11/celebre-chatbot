@@ -1,4 +1,4 @@
-// api/webhook.js - v7 Fixed
+// api/webhook.js - v8 Fixed (form_call_time removed, button response fixed)
 
 const express = require("express");
 const router = express.Router();
@@ -16,40 +16,40 @@ const CATEGORIES = {
     "Skin Treatment": [{ title: "Skin Rejuvenation", description: "Youthful glow" }, { title: "Acne Scar Treatment", description: "Scar removal" }, { title: "Skin Pigmentation", description: "Dark spots" }, { title: "Scar Revision", description: "Scar improvement" }, { title: "Vitiligo", description: "Vitiligo treatment" }]
 };
 
-// ============ CATEGORY FORMS ============
+// ============ CATEGORY FORMS (form_call_time REMOVED from all) ============
 const CAT_FORMS = {
     "Hair Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
         specific: { en: "💇 *Hair Loss Stage*:", hi: "💇 *हेयर लॉस स्टेज*:", gu: "💇 *હેર લોસ સ્ટેજ*:" },
         specificOptions: ["Mild", "Moderate", "Severe"],
         photo: { en: "📸 Share *2-3 Clear Hair Photos* (Front, Top & Back):", hi: "📸 *2-3 बालों की साफ फोटो* भेजें (आगे, ऊपर, पीछे):", gu: "📸 *2-3 વાળના સ્પષ્ટ ફોટો* મોકલો (આગળ, ઉપર, પાછળ):" }
     },
     "Face Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
         specific: { en: "🎯 *What improvement do you want?* (Describe your concern):", hi: "🎯 *आप क्या सुधार चाहते हैं?* (अपनी समस्या बताएं):", gu: "🎯 *તમે શું સુધારો ઈચ્છો છો?* (તમારી સમસ્યા જણાવો):" },
         specificOptions: null,
         photo: { en: "📸 Share *Front & Side Profile Photos*:", hi: "📸 *सामने और साइड फोटो* भेजें:", gu: "📸 *આગળ અને સાઈડ ફોટો* મોકલો:" }
     },
     "Breast Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_specific", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_specific"],
         specific: { en: "🎯 *Desired Procedure*:", hi: "🎯 *इच्छित प्रक्रिया*:", gu: "🎯 *ઈચ્છિત પ્રક્રિયા*:" },
         specificOptions: ["Enhancement", "Reduction", "Lift"],
         photo: null
     },
     "Body Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_specific", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_specific"],
         specific: { en: "📍 *Area(s) You Want Treated* (Abdomen, Waist, Thighs, Arms, Chin, etc.):", hi: "📍 *किन हिस्सों का इलाज* चाहते हैं (पेट, कमर, जांघ, बाहें, ठुड्डी आदि):", gu: "📍 *ક્યા ભાગની સારવાર* કરાવવા માંગો છો (પેટ, કમર, જાંઘ, હાથ, ચિન વગેરે):" },
         specificOptions: null,
         photo: null
     },
     "Gynecomastia": {
-        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_photos", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_weight", "form_height", "form_photos"],
         specific: null,
         specificOptions: null,
         photo: { en: "📸 Share *2-3 Clear Chest Photos*:", hi: "📸 *2-3 छाती की साफ फोटो* भेजें:", gu: "📸 *2-3 છાતીના સ્પષ્ટ ફોટો* મોકલો:" }
     },
     "Skin Treatment": {
-        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos", "form_call_time"],
+        fields: ["form_name", "form_city", "form_age", "form_specific", "form_photos"],
         specific: { en: "🎯 *Skin Concern* (Acne, Scars, Pigmentation, Dark Spots, Anti-Aging, etc.):", hi: "🎯 *त्वचा की समस्या* (एक्ने, दाग, पिगमेंटेशन, डार्क स्पॉट्स आदि):", gu: "🎯 *ત્વચા સંબંધિત સમસ્યા* (એક્ને, ડાઘ, પિગમેન્ટેશન, ડાર્ક સ્પોટ્સ વગેરે):" },
         specificOptions: null,
         photo: { en: "📸 Share *2-3 Photos of Concerned Area*:", hi: "📸 *प्रभावित हिस्से की 2-3 फोटो* भेजें:", gu: "📸 *અસરગ્રસ્ત ભાગના 2-3 ફોટો* મોકલો:" }
@@ -71,13 +71,12 @@ const MSG = {
     ask_age: { en: "🎂 Your *Age*:", hi: "🎂 आपकी *उम्र*:", gu: "🎂 તમારી *ઉંમર*:" },
     ask_weight: { en: "⚖️ Your *Approx. Weight* (kg):", hi: "⚖️ आपका *अनुमानित वज़न* (kg):", gu: "⚖️ તમારું *અંદાજિત વજન* (kg):" },
     ask_height: { en: "📏 Your *Height*:", hi: "📏 आपकी *ऊंचाई*:", gu: "📏 તમારી *ઊંચાઈ*:" },
-    ask_call_time: { en: "⏰ *Preferred Time for a Call* (11AM-8PM):", hi: "⏰ *कॉल के लिए पसंदीदा समय* (11AM-8PM):", gu: "⏰ *કૉલ માટે પસંદગીનો સમય* (11AM-8PM):" },
     book_ask: { en: "Would you like to book a consultation date?", hi: "क्या आप कंसल्टेशन डेट बुक करना चाहेंगे?", gu: "શું તમે કન્સલ્ટેશન ડેટ બુક કરવા માંગો છો?" },
     ask_date: { en: "📅 Type your preferred *date*.\nFormat: *25 June 2026*\n(Future dates only)", hi: "📅 *तारीख* लिखें।\nफॉर्मेट: *25 June 2026*\n(सिर्फ आने वाली तारीख)", gu: "📅 *તારીખ* લખો.\nફોર્મેટ: *25 June 2026*\n(માત્ર ભવિષ્યની તારીખ)" },
     bad_date: { en: "❌ Enter a valid *future date*.\nFormat: *25 June 2026*", hi: "❌ सही *भविष्य की तारीख* लिखें।\nफॉर्मेट: *25 June 2026*", gu: "❌ યોગ્ય *ભવિષ્યની તારીખ* લખો.\nફોર્મેટ: *25 June 2026*" },
     select_time: { en: "🕐 Select a time slot:", hi: "🕐 समय चुनें:", gu: "🕐 સમય પસંદ કરો:" },
     bad_time: { en: "Select a valid time from the list.", hi: "सूची से सही समय चुनें।", gu: "યાદીમાંથી યોગ્ય સમય પસંદ કરો." },
-    confirmed: { en: "✅ *Consultation Booked!*\n\n🏥 Service: *{service}*\n👤 Name: *{name}*\n📍 City: *{city}*\n🎂 Age: *{age}*\n{extra}📅 Date: *{date}*\n🕐 Time: *{time}*\n\nOur specialist will call you soon.\nThank you! 💜\n\n📍 Surat | Ahmedabad | Rajkot\n🌐 celebre.in", hi: "✅ *कंसल्टेशन बुक!*\n\n🏥 सेवा: *{service}*\n👤 नाम: *{name}*\n📍 शहर: *{city}*\n🎂 उम्र: *{age}*\n{extra}📅 तारीख: *{date}*\n🕐 समय: *{time}*\n\nविशेषज्ञ जल्द संपर्क करेंगे।\nधन्यवाद! 💜\n\n📍 सूरत | अहमदाबाद | राजकोट\n🌐 celebre.in", gu: "✅ *કન્સલ્ટેશન બુક!*\n\n🏥 સેવા: *{service}*\n👤 નામ: *{name}*\n📍 શહેર: *{city}*\n🎂 ઉંમર: *{age}*\n{extra}📅 તારીખ: *{date}*\n🕐 સમય: *{time}*\n\nનિષ્ણાત ટૂંક સમયમાં સંપર્ક કરશે.\nઆભાર! 💜\n\n📍 સુરત | અમદાવાદ | રાજકોટ\n🌐 celebre.in" },
+    confirmed: { en: "✅ *Consultation Booked!*\n\n🏥 Service: *{service}*\n👤 Name: *{name}*\n📍 City: *{city}*\n🎂 Age: *{age}*\n{extra}📅 Date: *{date}*\n🕐 Time: *{time}*\n\nOur specialist will call you soon.\nThank you! 💜\n\n📍 Surat | Ahmedabad | Rajkot\n🌐 celebre.in", hi: "✅ *कंसल्टेशन बुक!*\n\n🏥 सेवा: *{service}*\n👤 नाम: *{name}*\n📍 शहर: *{city}*\n🎂 उम्र: *{age}*\n{extra}📅 तारीख: *{date}*\n🕐 समय: *{time}*\n\nविशेषज्ञ जल्द संपर्क करेंगे।\nधन्यवाद! 💜\n\n📍 सूरत | अहमदाबाद | राजकोट\n🌐 celebre.in", gu: "✅ *કન્સલ્ટેશન બુક!*\n\n🏥 સેવા: *{service}*\n👤 નામ: *{name}*\n📍 શહેર: *{city}*\n🎂 ઉંમર: *{age}*\n{extra}📅 તારીખ: *{date}*\n🕐 સમય: *{time}*\n\nનિષ્ણાત ટૂંક સમયમાં સંપર્કn કરશે.\nઆભાર! 💜\n\n📍 સુરત | અમદાવાદ | રાજકોટ\n🌐 celebre.in" },
     again: { en: "Say *Celebre* to start again!", hi: "*Celebre* भेजें फिर से शुरू करने के लिए!", gu: "*Celebre* મોકલો ફરીથી શરૂ કરવા!" },
     btn_book: { en: "Yes, Book Now", hi: "हाँ, बुक करें", gu: "હા, બુક કરો" },
     btn_other: { en: "Other Services", hi: "अन्य सेवाएं", gu: "અન્ય સેવાઓ" },
@@ -87,9 +86,9 @@ const MSG = {
     v_weight: { en: "❌ Enter valid *weight* in kg (20-300):", hi: "❌ सही *वज़न* kg में लिखें (20-300):", gu: "❌ યોગ્ય *વજન* kg માં લખો (20-300):" },
     v_height: { en: "❌ Enter valid *height* (e.g. 5'6 or 168cm):", hi: "❌ सही *ऊंचाई* लिखें:", gu: "❌ યોગ્ય *ઊંચાઈ* લખો:" },
     v_specific: { en: "❌ Please describe in at least a few words:", hi: "❌ कम से कम कुछ शब्दों में बताएं:", gu: "❌ ઓછામાં ઓછા થોડા શબ્દોમાં જણાવો:" },
-    v_photo: { en: "❌ Please send a *photo/image*, not text 📸", hi: "❌ *फोटो* भेजें, टेक्स्ट नहीं 📸", gu: "❌ *ફોટો* મોકલો, ટેક્સ્ટ નહીં 📸" },
-    force_answer: { en: "⚠️ Please answer the current question first.", hi: "⚠️ कृपया पहले मौजूदा सवाल का जवाब दें।", gu: "⚠️ કૃપા કરીને પહેલા હાલના પ્રશ્નનો જવાબ આપો." },
-    force_select: { en: "⚠️ Please select an option from above.", hi: "⚠️ कृपया ऊपर दिए गए विकल्प में से चुनें।", gu: "⚠️ કૃપા કરીને ઉપરના વિકલ્પમાંથી પસંદ કરો." }
+    v_photo: { en: "❌ Please send a *photo/image*, not text 📸", hi: "❌ *फोटो* भेजें, टेक्स्ट नहीं 📸", gu: "❌ *ફોટો* મોકलो, ટેક્સ્ટ નहीं 📸" },
+    force_answer: { en: "⚠️ Please answer the current question first.", hi: "⚠️ कृपया पहले मौजूदा सवाल का जवाब दें।", gu: "⚠️ કૃपा કরીने पहले हालना प्रश्ननो जवाब आपो." },
+    force_select: { en: "⚠️ Please select an option from above.", hi: "⚠️ कृपया ऊपर दिए गए विकल्प में से चुनें।", gu: "⚠️ કૃपा करीने उपरना विकल्पमांथी पसंद करो." }
 };
 
 // ============ HELPERS ============
@@ -108,6 +107,20 @@ function findTime(m) { const l = m.toLowerCase().replace(/\s/g, ""); for (const 
 function isValidName(m) { return m.length >= 2 && /^[a-zA-Z\u0900-\u097F\u0A80-\u0AFF\s.]+$/.test(m); }
 function isValidCity(m) { return m.length >= 2 && /^[a-zA-Z\u0900-\u097F\u0A80-\u0AFF\s,.-]+$/.test(m); }
 
+// ============ KEY FIX: Message extraction — button reply (title/postback) properly captured ============
+function extractMessage(body, media) {
+    // Priority order: postback data → whatsapp title → button/list reply → text → media
+    const postback = body.postback?.data || "";
+    const waTitle = body.whatsapp?.title || "";
+    const interactiveTitle = body.interactive?.title || body.interactive?.list_reply?.title || body.interactive?.button_reply?.title || "";
+    const listReply = body.listReply?.title || body.buttonReply?.title || "";
+    const textContent = body.content?.text || body.UserResponse || "";
+
+    // For button/interactive responses, whatsapp.title is the most reliable
+    const msg = waTitle || postback || interactiveTitle || listReply || textContent || (media ? "__PHOTO__" : "");
+    return msg.trim();
+}
+
 async function sendFQ(ph, state, cat, lang) {
     const cf = getCF(cat);
     switch (state) {
@@ -121,25 +134,32 @@ async function sendFQ(ph, state, cat, lang) {
             else await sendText(ph, t(cf.specific, lang));
             break;
         case "form_photos": await sendText(ph, t(cf.photo, lang)); break;
-        case "form_call_time": await sendText(ph, t("ask_call_time", lang)); break;
     }
 }
 
 // ============ MAIN ============
 router.post("/", async (req, res) => {
     try {
-        const body = req.body; const phone = body.from || ""; const senderName = body.whatsapp?.senderName || "";
+        const body = req.body;
+        const phone = body.from || "";
+        const senderName = body.whatsapp?.senderName || "";
         const media = isMedia(body);
-        const message = (body.content?.text || body.UserResponse || body.whatsapp?.title || body.interactive?.title || body.interactive?.list_reply?.title || body.interactive?.button_reply?.title || body.listReply?.title || body.buttonReply?.title || (media ? "__PHOTO__" : "")).trim();
-        console.log("Incoming:", phone, message);
+
+        // *** FIXED: Use dedicated extractor instead of inline mess ***
+        const message = extractMessage(body, media);
+
+        console.log("Incoming:", phone, "|", message, "| media:", media);
         if (!phone || !message) return res.status(200).json({ success: true });
+
         const TEST = ["917820870519"];
         if (!TEST.includes(phone)) { console.log("Skip:", phone); return res.status(200).json({ success: true }); }
-        const convo = await getC(phone, senderName); const lang = convo.language || "en";
+
+        const convo = await getC(phone, senderName);
+        const lang = convo.language || "en";
 
         // RESET
         if (isGreet(message)) {
-            await up(phone, { state: "language_selection", language: "", selected_category: "", selected_service: "", form_name: "", form_city: "", form_age: "", form_weight: "", form_height: "", form_specific: "", form_photos: "", form_call_time: "", booking_date: "", booking_time: "" });
+            await up(phone, { state: "language_selection", language: "", selected_category: "", selected_service: "", form_name: "", form_city: "", form_age: "", form_weight: "", form_height: "", form_specific: "", form_photos: "", booking_date: "", booking_time: "" });
             await sendButtons(phone, "Select your language / भाषा चुनें / ભાષા પસંદ કરો", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
@@ -147,21 +167,30 @@ router.post("/", async (req, res) => {
         // LANGUAGE
         if (convo.state === "language_selection") {
             const dl = detectL(message);
-            if (dl) { await up(phone, { language: dl, state: "category_selection" }); await sendText(phone, t("welcome", dl, { name: senderName || "there" })); await sendList(phone, t("select_cat", dl), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics"); return res.status(200).json({ success: true }); }
+            if (dl) {
+                await up(phone, { language: dl, state: "category_selection" });
+                await sendText(phone, t("welcome", dl, { name: senderName || "there" }));
+                await sendList(phone, t("select_cat", dl), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics");
+                return res.status(200).json({ success: true });
+            }
             await sendText(phone, t("force_select", lang));
-            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
+            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગુજरातી"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
         // CATEGORY
         if (convo.state === "category_selection") {
-            const cat = findCat(message) || message; const svcs = CATEGORIES[cat];
+            const cat = findCat(message) || message;
+            const svcs = CATEGORIES[cat];
             if (svcs) {
                 if (cat === "Gynecomastia") {
                     await up(phone, { selected_category: cat, selected_service: "Gynecomastia Surgery", state: "service_info" });
                     const info = await getAIReply("About Gynecomastia surgery. IMPORTANT: Reply ONLY in " + aL(lang) + ". Keep exactly 3 short lines. No bullet points.", "Celebre Aesthetics clinic info");
                     await sendText(phone, "ℹ️ *Gynecomastia Surgery*\n\n" + info);
-                    await sendText(phone, t("form_start", lang)); await sendFQ(phone, "form_name", cat, lang); await up(phone, { state: "form_name" });
+                    await sendText(phone, t("form_start", lang));
+                    const firstField = getCF(cat).fields[0];
+                    await sendFQ(phone, firstField, cat, lang);
+                    await up(phone, { state: firstField });
                 } else {
                     await sendList(phone, t("select_svc", lang, { cat }), cat.split(" ")[0], [{ title: cat, rows: svcs }], cat);
                     await up(phone, { state: "service_selection", selected_category: cat });
@@ -180,7 +209,10 @@ router.post("/", async (req, res) => {
                 await up(phone, { selected_service: svc.service, selected_category: svc.category, state: "service_info" });
                 const info = await getAIReply("About " + svc.service + " procedure. IMPORTANT: Reply ONLY in " + aL(lang) + ". Keep exactly 3 short lines. No bullet points.", "Celebre Aesthetics clinic info");
                 await sendText(phone, "ℹ️ *" + svc.service + "*\n\n" + info);
-                await sendText(phone, t("form_start", lang)); await sendFQ(phone, getCF(svc.category).fields[0], svc.category, lang); await up(phone, { state: getCF(svc.category).fields[0] });
+                await sendText(phone, t("form_start", lang));
+                const firstField = getCF(svc.category).fields[0];
+                await sendFQ(phone, firstField, svc.category, lang);
+                await up(phone, { state: firstField });
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
@@ -193,7 +225,8 @@ router.post("/", async (req, res) => {
         const fields = cf.fields;
 
         if (fields.includes(convo.state)) {
-            // FORCE — photo bhejne pe text field mein ya text bhejne pe photo field mein
+            // FORCE — wrong input type check
+            // If photo received but current field is NOT form_photos or form_specific
             if (convo.state !== "form_photos" && convo.state !== "form_specific" && (message === "__PHOTO__" || media)) {
                 await sendText(phone, t("force_answer", lang));
                 await sendFQ(phone, convo.state, convo.selected_category, lang);
@@ -201,24 +234,48 @@ router.post("/", async (req, res) => {
             }
 
             // VALIDATION
-            if (convo.state === "form_name" && !isValidName(message)) { await sendText(phone, t("v_name", lang)); return res.status(200).json({ success: true }); }
-            if (convo.state === "form_city" && !isValidCity(message)) { await sendText(phone, t("v_city", lang)); return res.status(200).json({ success: true }); }
-            if (convo.state === "form_age") { const a = Number(message); if (isNaN(a) || a < 10 || a > 100 || !Number.isInteger(a)) { await sendText(phone, t("v_age", lang)); return res.status(200).json({ success: true }); } }
-            if (convo.state === "form_weight") { const w = Number(message); if (isNaN(w) || w < 20 || w > 300) { await sendText(phone, t("v_weight", lang)); return res.status(200).json({ success: true }); } }
-            if (convo.state === "form_height" && (message === "__PHOTO__" || media || message.length < 2)) { await sendText(phone, t("v_height", lang)); return res.status(200).json({ success: true }); }
-            if (convo.state === "form_specific" && !media && message !== "__PHOTO__" && message.length < 3) { await sendText(phone, t("v_specific", lang)); return res.status(200).json({ success: true }); }
-            if (convo.state === "form_photos" && !media && message !== "__PHOTO__") { await sendText(phone, t("v_photo", lang)); return res.status(200).json({ success: true }); }
-            if (convo.state === "form_call_time" && (message === "__PHOTO__" || media || message.length < 2)) { await sendText(phone, t("ask_call_time", lang)); return res.status(200).json({ success: true }); }
+            if (convo.state === "form_name" && !isValidName(message)) {
+                await sendText(phone, t("v_name", lang)); return res.status(200).json({ success: true });
+            }
+            if (convo.state === "form_city" && !isValidCity(message)) {
+                await sendText(phone, t("v_city", lang)); return res.status(200).json({ success: true });
+            }
+            if (convo.state === "form_age") {
+                const a = Number(message);
+                if (isNaN(a) || a < 10 || a > 100 || !Number.isInteger(a)) {
+                    await sendText(phone, t("v_age", lang)); return res.status(200).json({ success: true });
+                }
+            }
+            if (convo.state === "form_weight") {
+                const w = Number(message);
+                if (isNaN(w) || w < 20 || w > 300) {
+                    await sendText(phone, t("v_weight", lang)); return res.status(200).json({ success: true });
+                }
+            }
+            if (convo.state === "form_height" && (message === "__PHOTO__" || media || message.length < 2)) {
+                await sendText(phone, t("v_height", lang)); return res.status(200).json({ success: true });
+            }
+            if (convo.state === "form_specific" && !media && message !== "__PHOTO__" && message.length < 3) {
+                await sendText(phone, t("v_specific", lang)); return res.status(200).json({ success: true });
+            }
+            if (convo.state === "form_photos" && !media && message !== "__PHOTO__") {
+                await sendText(phone, t("v_photo", lang)); return res.status(200).json({ success: true });
+            }
 
             // STORE
-            const map = { form_name: "form_name", form_city: "form_city", form_age: "form_age", form_weight: "form_weight", form_height: "form_height", form_specific: "form_specific", form_call_time: "form_call_time" };
-            if (convo.state === "form_photos") await up(phone, { form_photos: "received" });
-            else if (map[convo.state]) await up(phone, { [map[convo.state]]: message });
+            if (convo.state === "form_photos") {
+                await up(phone, { form_photos: "received" });
+            } else {
+                const storeKey = convo.state; // form_name, form_city, etc.
+                await up(phone, { [storeKey]: message });
+            }
 
-            // NEXT
+            // NEXT FIELD or DONE
             const idx = fields.indexOf(convo.state);
             if (idx >= 0 && idx + 1 < fields.length) {
-                const ns = fields[idx + 1]; await sendFQ(phone, ns, convo.selected_category, lang); await up(phone, { state: ns });
+                const ns = fields[idx + 1];
+                await sendFQ(phone, ns, convo.selected_category, lang);
+                await up(phone, { state: ns });
             } else {
                 // Form done → booking ask
                 await sendButtons(phone, t("book_ask", lang), [t("btn_book", lang), t("btn_other", lang)], "Celebre Aesthetics");
@@ -230,8 +287,16 @@ router.post("/", async (req, res) => {
         // BOOKING ASK
         if (convo.state === "booking_ask") {
             const l = message.toLowerCase();
-            if (l.includes("yes") || l.includes("book") || l.includes("हाँ") || l.includes("હા")) { await sendText(phone, t("ask_date", lang)); await up(phone, { state: "date_selection" }); return res.status(200).json({ success: true }); }
-            if (l.includes("other") || l.includes("service") || l.includes("अन्य") || l.includes("અન્ય")) { await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics"); await up(phone, { state: "category_selection", selected_category: "", selected_service: "" }); return res.status(200).json({ success: true }); }
+            if (l.includes("yes") || l.includes("book") || l.includes("हाँ") || l.includes("हां") || l.includes("બુક") || l.includes("હા")) {
+                await sendText(phone, t("ask_date", lang));
+                await up(phone, { state: "date_selection" });
+                return res.status(200).json({ success: true });
+            }
+            if (l.includes("other") || l.includes("service") || l.includes("अन्य") || l.includes("અन्य") || l.includes("સેવ")) {
+                await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics");
+                await up(phone, { state: "category_selection", selected_category: "", selected_service: "" });
+                return res.status(200).json({ success: true });
+            }
             await sendText(phone, t("force_select", lang));
             await sendButtons(phone, t("book_ask", lang), [t("btn_book", lang), t("btn_other", lang)], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
@@ -239,8 +304,17 @@ router.post("/", async (req, res) => {
 
         // DATE
         if (convo.state === "date_selection") {
-            if (validDate(message)) { const fd = fmtDate(message); await up(phone, { booking_date: fd, state: "time_selection" }); await sendList(phone, t("select_time", lang) + "\n\n📅 " + fd, lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }], "Celebre Aesthetics"); return res.status(200).json({ success: true }); }
-            await sendText(phone, t("bad_date", lang)); return res.status(200).json({ success: true });
+            if (validDate(message)) {
+                const fd = fmtDate(message);
+                await up(phone, { booking_date: fd, state: "time_selection" });
+                await sendList(phone, t("select_time", lang) + "\n\n📅 " + fd,
+                    lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સमय पसंद करो",
+                    [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉपलब्ध", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
+                    "Celebre Aesthetics");
+                return res.status(200).json({ success: true });
+            }
+            await sendText(phone, t("bad_date", lang));
+            return res.status(200).json({ success: true });
         }
 
         // TIME
@@ -252,26 +326,36 @@ router.post("/", async (req, res) => {
                 const latestCF = getCF(latest.selected_category);
                 const latestFields = latestCF.fields;
                 let extra = "";
-                if (latestFields.includes("form_weight")) extra += "⚖️ " + (lang === "en" ? "Weight" : lang === "hi" ? "वज़न" : "વજન") + ": *" + latest.form_weight + "*\n";
-                if (latestFields.includes("form_height")) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊંચાઈ") + ": *" + latest.form_height + "*\n";
-                if (latestCF.specific) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વિગતો") + ": *" + latest.form_specific + "*\n";
-                if (latestCF.photo) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ફોટો") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ્રાપ્ત") + "*\n";
+                if (latestFields.includes("form_weight")) extra += "⚖️ " + (lang === "en" ? "Weight" : lang === "hi" ? "वज़न" : "વजन") + ": *" + latest.form_weight + "*\n";
+                if (latestFields.includes("form_height")) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊंचाई") + ": *" + latest.form_height + "*\n";
+                if (latestCF.specific) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વিगत") + ": *" + latest.form_specific + "*\n";
+                if (latestCF.photo) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ফोटো") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ्राप्त") + "*\n";
                 await sendText(phone, t("confirmed", lang, { service: latest.selected_service, name: latest.form_name, city: latest.form_city, age: latest.form_age, extra: extra, date: latest.booking_date, time: slot }));
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
-            await sendList(phone, t("select_time", lang), lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સમય પસંદ કરો", [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉપલબ્ધ", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }], "Celebre Aesthetics");
+            await sendList(phone, t("select_time", lang),
+                lang === "en" ? "Select Time" : lang === "hi" ? "समय चुनें" : "સमय पसंद करो",
+                [{ title: lang === "en" ? "Available" : lang === "hi" ? "उपलब्ध" : "ઉपलब्ध", rows: TIME_SLOTS.map(s => ({ title: s, description: "Available" })) }],
+                "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
         // CONFIRMED
-        if (convo.state === "confirmed") { await sendText(phone, t("again", lang)); return res.status(200).json({ success: true }); }
+        if (convo.state === "confirmed") {
+            await sendText(phone, t("again", lang));
+            return res.status(200).json({ success: true });
+        }
 
         // DEFAULT
         const r = await getAIReply(message + ". Reply ONLY in " + aL(lang) + ". 3 lines max.", "General");
-        await sendText(phone, r); return res.status(200).json({ success: true });
+        await sendText(phone, r);
+        return res.status(200).json({ success: true });
 
-    } catch (error) { console.error("Webhook error:", error.message); return res.status(200).json({ success: true }); }
+    } catch (error) {
+        console.error("Webhook error:", error.message);
+        return res.status(200).json({ success: true });
+    }
 });
 
 module.exports = router;
