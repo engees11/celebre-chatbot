@@ -267,7 +267,7 @@ router.post("/", async (req, res) => {
         // RESET
         if (isGreet(message)) {
             await up(phone, { state: "language_selection", language: "", selected_category: "", selected_service: "", form_name: "", form_city: "", form_age: "", form_weight: "", form_height: "", form_specific: "", form_photos: "", booking_date: "", booking_time: "" });
-            await sendButtons(phone, "Select your language / भाषा चुनें / ભાષા પсंद करो", ["English", "हिंदी", "ગуजраТी"], "Celebre Aesthetics");
+            await sendButtons(phone, "Select your language / भाषा चुनें / ભાષા પસંદ કરો", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
@@ -281,7 +281,7 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
-            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગуजраТী"], "Celebre Aesthetics");
+            await sendButtons(phone, "Select a language", ["English", "हिंदी", "ગુજરાતી"], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
