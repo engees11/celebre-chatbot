@@ -20,8 +20,7 @@ Rules:
 3. Medically accurate info
 4. Never give pricing — say specialist will discuss during free consultation
 5. Always encourage booking free consultation
-6. Timings: 11 AM to 8 PM
-7. Website: celebre.in`;
+6. Timings: 11 AM to 8 PM`;
 
 async function getAIReply(userMessage, context) {
     try {
