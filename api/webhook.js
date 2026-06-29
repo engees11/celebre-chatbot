@@ -256,7 +256,6 @@ router.post("/", async (req, res) => {
                 if (latestFields.includes("form_height")) extra += "📏 " + (lang === "en" ? "Height" : lang === "hi" ? "ऊंचाई" : "ઊંચાઈ") + ": *" + latest.form_height + "*\n";
                 if (latestCF.specific) extra += "🎯 " + (lang === "en" ? "Details" : lang === "hi" ? "विवरण" : "વિગતો") + ": *" + latest.form_specific + "*\n";
                 if (latestCF.photo) extra += "📸 " + (lang === "en" ? "Photos" : lang === "hi" ? "फोटो" : "ફોટો") + ": *" + (lang === "en" ? "Received" : lang === "hi" ? "प्राप्त" : "પ્રાપ્ત") + "*\n";
-                extra += "⏰ " + (lang === "en" ? "Call Time" : lang === "hi" ? "कॉल समय" : "કૉલ સમય") + ": *" + latest.form_call_time + "*\n";
                 await sendText(phone, t("confirmed", lang, { service: latest.selected_service, name: latest.form_name, city: latest.form_city, age: latest.form_age, extra: extra, date: latest.booking_date, time: slot }));
                 return res.status(200).json({ success: true });
             }

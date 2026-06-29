@@ -18,6 +18,8 @@ const conversationSchema = new mongoose.Schema({
     form_specific: { type: String, default: "" },
     form_photos: { type: String, default: "" },
     form_call_time: { type: String, default: "" },
+    booking_date: { type: String, default: "" },
+    booking_time: { type: String, default: "" },
     updated_at: { type: Date, default: Date.now }
 });
 
