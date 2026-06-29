@@ -443,7 +443,7 @@ function detectL(m) {
     const l = m.toLowerCase();
     if (l.includes("english") || l === "en") return "en";
     if (l.includes("hindi") || l.includes("हिंदी") || l === "hi") return "hi";
-    if (l.includes("gujarati") || l.includes("ગуजरাতী") || l === "gu") return "gu";
+    if (l.includes("gujarati") || m.startsWith("ગ") || l === "gu") return "gu";
     return null;
 }
 function isMedia(b) { return b.content?.contentType === "media" || !!b.content?.media; }
@@ -522,7 +522,7 @@ router.post("/", async (req, res) => {
             if (dl) {
                 await up(phone, { language: dl, state: "category_selection" });
                 await sendText(phone, t("welcome", dl, { name: senderName || "there" }));
-                await sendList(phone, t("select_cat", dl), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics");
+                await sendList(phone, t("select_cat", dl), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + (dl === "hi" ? " प्रक्रियाएं" : dl === "gu" ? " સારવાર" : " procedures") })) }], "Celebre Aesthetics");
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
@@ -551,7 +551,7 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             await sendText(phone, t("force_select", lang));
-            await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics");
+            await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + (lang === "hi" ? " प्रक्रियाएं" : lang === "gu" ? " સારवાર" : " procedures") })) }], "Celebre Aesthetics");
             return res.status(200).json({ success: true });
         }
 
@@ -640,7 +640,7 @@ router.post("/", async (req, res) => {
                 return res.status(200).json({ success: true });
             }
             if (l.includes("other") || l.includes("service") || l.includes("अन्य") || l.includes("अन्य") || l.includes("सेव")) {
-                await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + " procedures" })) }], "Celebre Aesthetics");
+                await sendList(phone, t("select_cat", lang), "Our Services", [{ title: "Categories", rows: Object.keys(CATEGORIES).map(c => ({ title: c, description: CATEGORIES[c].length + (lang === "hi" ? " प्रक्रियाएं" : lang === "gu" ? " સારવાર" : " procedures") })) }], "Celebre Aesthetics");
                 await up(phone, { state: "category_selection", selected_category: "", selected_service: "" });
                 return res.status(200).json({ success: true });
             }
