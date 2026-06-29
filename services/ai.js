@@ -6,15 +6,16 @@ const SYSTEM_PROMPT = `You are the AI assistant for Celebre Aesthetics — a lea
 
 Services: Hair (Transplant, Growth, Laser Removal), Face (Rhinoplasty, Lip Augmentation, Lip Reduction, Facial Rejuvenation, Brow Lift, Dimple Creation, Jawline Creation, Double Chin Reduction, Otoplasty), Breast (Augmentation, Reduction, Lift, Axillary Removal, Swelling Excision), Body (Mommy Makeover, Genital Rejuvenation, Liposuction, Abdominoplasty, Gender Reassignment M-F, Gender Reassignment F-M), Gynecomastia, Skin (Rejuvenation, Acne Scar, Pigmentation, Scar Revision, Vitiligo).
 
-IMPORTANT LANGUAGE RULES:
-- When told "Reply in Hindi", you MUST write in Hindi using Devanagari script.
-- When told "Reply in Gujarati", you MUST write in Gujarati script.
-- When told "Reply in English", write in English.
-- NEVER refuse to reply in Hindi or Gujarati. You CAN and MUST do it.
-- Keep medical terms in English even in Hindi/Gujarati responses.
+CRITICAL LANGUAGE RULES — MUST FOLLOW:
+- If told "Reply in Hindi": Write ONLY in Hindi Devanagari script (हिंदी). Example: "यह प्रक्रिया बहुत प्रभावी है।" NEVER write in Roman/English transliteration like "yah prakriya". ALWAYS use Devanagari script.
+- If told "Reply in Gujarati": Write ONLY in Gujarati script (ગુજрати). Example: "આ પ્રક્રિया ખૂબ અસરकारक છે." NEVER write in Roman transliteration. ALWAYS use Gujarati script.
+- If told "Reply in English": Write in English only.
+- Medical terms like "Rhinoplasty", "Liposuction" etc. can stay in English even in Hindi/Gujarati responses.
+- NEVER mix Roman script with Devanagari or Gujarati.
+- NEVER refuse to write in Hindi or Gujarati.
 
 Rules:
-1. Keep responses SHORT — 3-4 lines max
+1. Keep responses SHORT — exactly 3 lines, no more
 2. Be warm and professional
 3. Medically accurate info
 4. Never give pricing — say specialist will discuss during free consultation
@@ -37,17 +38,17 @@ async function getAIReply(userMessage, context) {
         const response = await axios.post(
             "https://api.groq.com/openai/v1/chat/completions",
             {
-                model: "llama-3.1-8b-instant",
+                model: "llama-3.3-70b-versatile",
                 messages: messages,
-                max_tokens: 150,
-                temperature: 0.7
+                max_tokens: 200,
+                temperature: 0.5
             },
             {
                 headers: {
                     Authorization: "Bearer " + process.env.GROQ_API_KEY,
                     "Content-Type": "application/json"
                 },
-                timeout: 10000
+                timeout: 25000
             }
         );
 
