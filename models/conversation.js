@@ -9,7 +9,7 @@ const conversationSchema = new mongoose.Schema({
     state: { type: String, default: "language_selection" },
     selected_category: { type: String, default: "" },
     selected_service: { type: String, default: "" },
-    // Form fields
+    // Form fields (legacy, not used in new flow but kept for safety)
     form_name: { type: String, default: "" },
     form_city: { type: String, default: "" },
     form_age: { type: String, default: "" },
@@ -21,6 +21,9 @@ const conversationSchema = new mongoose.Schema({
     booking_date: { type: String, default: "" },
     booking_date_raw: { type: String, default: "" },
     booking_time: { type: String, default: "" },
+    // New dynamic question flow fields
+    q_index: { type: Number, default: 0 },
+    answers: { type: mongoose.Schema.Types.Mixed, default: {} },
     updated_at: { type: Date, default: Date.now }
 });
 
