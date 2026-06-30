@@ -59,7 +59,12 @@ function catRows(l) { return Object.keys(CATEGORIES).map(c => ({ title: c, descr
 // Last question in every list is always "preferred_time" (text), added automatically.
 
 const Q = {
-    since_when: { key: "q1", text: { en: "📅 Since when have you been experiencing this concern?", hi: "📅 आपको यह समस्या कब से है?", gu: "📅 તમને આ સમસ્યા ક્યારથી છે?" }, type: "text" },
+    since_concern: { key: "q1", text: { en: "📅 Since when have you been experiencing this concern?", hi: "📅 आपको यह समस्या कब से है?", gu: "📅 તમને આ સમસ્યા ક્યારથી છે?" }, type: "text" },
+    since_problem: { key: "q1", text: { en: "📅 Since when have you been experiencing this problem?", hi: "📅 आपको यह समस्या कब से है?", gu: "📅 તમને આ સમસ્યા ક્યારથી છે?" }, type: "text" },
+    since_hairloss: { key: "q1", text: { en: "📅 Since when have you been experiencing hair loss?", hi: "📅 आपको बाल झड़ने की समस्या कब से है?", gu: "📅 તમને વાળ ખરવાની સમસ્યા ક્યારથી છે?" }, type: "text" },
+    since_skin_concern: { key: "q1", text: { en: "📅 Since when have you been experiencing this skin concern?", hi: "📅 आपको यह स्किन समस्या कब से है?", gu: "📅 તમને આ સ્કિન સમસ્યા ક્યારથી છે?" }, type: "text" },
+    lipo_since: { key: "q1", text: { en: "📅 Since when have you been concerned about the stubborn fat?", hi: "📅 आपको स्टबर्न फैट की समस्या कब से है?", gu: "📅 તમને સ્ટબર્ન ફેટની સમસ્યા ક્યારથી છે?" }, type: "text" },
+    tummy_since: { key: "q1", text: { en: "📅 Since when have you been experiencing loose abdominal skin or excess tummy fat?", hi: "📅 आपको पेट की ढीली त्वचा या एक्सट्रा फैट की समस्या कब से है?", gu: "📅 તમને પેટની ઢીલી ત્વચા અથવા વધારાની ચરબીની સમસ્યા ક્યારથી છે?" }, type: "text" },
     family_history: { key: "q2", text: { en: "👨‍👩‍👦 Is there a family history of hair loss?", hi: "👨‍👩‍👦 क्या परिवार में बालों के झड़ने का इतिहास है?", gu: "👨‍👩‍👦 શું પરિવારમાં વાળ ખરવાનો ઇતિહાસ છે?" }, type: "text" },
     medications: { key: "q3", text: { en: "💊 Are you taking any regular medications or do you have any medical conditions?", hi: "💊 क्या आप कोई नियमित दवा लेते हैं या कोई मेडिकल कंडीशन है?", gu: "💊 શું તમે કોઈ નિયમિત દવા લો છો અથવા કોઈ મેડિકલ કન્ડિશન છે?" }, type: "text" },
     nose_history: { key: "q2", text: { en: "🤕 Have you had any previous nose injury, surgery, or breathing problems?", hi: "🤕 क्या पहले कभी नाक में चोट, सर्जरी, या सांस की समस्या हुई है?", gu: "🤕 શું પહેલા નાકમાં ઈજા, સર્જરી, અથવા શ્વાસની સમસ્યા થઈ છે?" }, type: "text" },
@@ -77,6 +82,7 @@ const Q = {
     chin_concern: { key: "q2", text: { en: "💬 Is your concern mainly excess fat, loose skin, or both?", hi: "💬 आपकी समस्या मुख्यतः एक्सट्रा फैट, ढीली त्वचा या दोनों है?", gu: "💬 તમારી સમસ્યા મુખ્યત્વે વધારાની ચરબી, ઢીલી ત્વચા અથવા બંને છે?" }, type: "buttons", options: ["Excess Fat", "Loose Skin", "Both"] },
     ear_concern: { key: "q1", text: { en: "👂 What is your main concern?", hi: "👂 आपकी मुख्य समस्या क्या है?", gu: "👂 તમારી મુખ્ય સમસ્યા શું છે?" }, type: "buttons", options: ["Prominent Ears", "Ear Shape", "Earlobe", "Injury"] },
     ear_history: { key: "q2", text: { en: "🩺 Have you had any previous ear surgery or injury?", hi: "🩺 क्या पहले कभी कान की सर्जरी या चोट हुई है?", gu: "🩺 શું પહેલા કાનની સર્જરી અથવા ઈજા થઈ છે?" }, type: "text" },
+    breast_goal: { key: "q2", text: { en: "💬 What is your primary goal?", hi: "💬 आपका मुख्य लक्ष्य क्या है?", gu: "💬 તમારો મુખ્ય ધ્યેય શું છે?" }, type: "buttons", options: ["Breast Augmentation", "Breast Lift", "Breast Reduction"] },
     breast_history: { key: "q3", text: { en: "👶 Have you had any pregnancies, breastfeeding history, or previous breast surgery? (If applicable)", hi: "👶 क्या आपकी कोई प्रेगनेंसी, ब्रेस्टफीडिंग हिस्ट्री या पहले ब्रेस्ट सर्जरी हुई है? (यदि लागू हो)", gu: "👶 શું તમારી કોઈ પ્રેગ્નન્સી, બ્રેસ્ટફીડિંગ હિસ્ટ્રી અથવા પહેલા બ્રેસ્ટ સર્જરી થઈ છે? (જો લાગુ હોય)" }, type: "text" },
     mommy_since: { key: "q1", text: { en: "📅 How long has it been since your last pregnancy or delivery?", hi: "📅 आपकी पिछली प्रेगनेंसी या डिलीवरी को कितना समय हुआ है?", gu: "📅 તમારી છેલ્લી પ્રેગ્નન્સી અથવા ડિલિવરી ને કેટલો સમય થયો છે?" }, type: "text" },
     mommy_breastfeeding: { key: "q2", text: { en: "👶 Are you currently breastfeeding?", hi: "👶 क्या आप अभी ब्रेस्टफीडिंग कर रही हैं?", gu: "👶 શું તમે હાલમાં બ્રેસ્ટફીડિંગ કરી રહ્યા છો?" }, type: "text" },
@@ -84,7 +90,7 @@ const Q = {
     genital_concern: { key: "q1", text: { en: "💬 What is your primary concern?", hi: "💬 आपकी प्रमुख समस्या क्या है?", gu: "💬 તમારી મુખ્ય સમસ્યા શું છે?" }, type: "buttons", options: ["Appearance", "Laxity", "Function", "Pigmentation"] },
     genital_history: { key: "q2", text: { en: "👶 Have you had any pregnancies, childbirth, or previous procedures in this area? (If applicable)", hi: "👶 क्या इस क्षेत्र में कोई प्रेगनेंसी, डिलीवरी या पहले प्रोसीजर हुआ है? (यदि लागू हो)", gu: "👶 શું આ વિસ્તારમાં કોઈ પ્રેગ્નન્સી, ડિલિવરી અથવા પહેલા પ્રોસિજર થયું છે? (જો લાગુ હોય)" }, type: "text" },
     tummy_history: { key: "q3", text: { en: "👶 If applicable, have you had any pregnancies or previous abdominal surgeries?", hi: "👶 यदि लागू हो, क्या कोई प्रेगनेंसी या पहले पेट की सर्जरी हुई है?", gu: "👶 જો લાગુ હોય, શું કોઈ પ્રેગ્નન્સી અથવા પહેલા પેટની સર્જરી થઈ છે?" }, type: "text" },
-    skin_concern: { key: "q2", text: { en: "💬 What is your main concern?", hi: "💬 आपकी मुख्य समस्या क्या है?", gu: "💬 તમારી મુખ્ય સમસ્યા શું છે?" }, type: "buttons", options: ["Acne", "Pigmentation", "Dark Spots", "Wrinkles"] },
+    skin_concern: { key: "q2", text: { en: "💬 What is your main concern?", hi: "💬 आपकी मुख्य समस्या क्या है?", gu: "💬 તમારી મુખ્ય સમસ્યા શું છે?" }, type: "list", options: ["Acne", "Acne Scars", "Pigmentation", "Melasma", "Dark Spots", "Wrinkles", "Uneven Skin Tone"] },
     skin_treatment_history: { key: "q4", text: { en: "🧴 Have you taken any previous skin treatments or are you currently using any prescription creams or medications?", hi: "🧴 क्या पहले कोई स्किन ट्रीटमेंट लिया है या कोई प्रिस्क्रिप्शन क्रीम/दवा इस्तेमाल कर रहे हैं?", gu: "🧴 શું પહેલા કોઈ સ્કિન ટ્રીટમેન્ટ લીધી છે અથવા કોઈ પ્રિસ્ક્રિપ્શન ક્રીમ/દવા વાપરી રહ્યા છો?" }, type: "text" }
 };
 
@@ -103,7 +109,7 @@ function photoQ(count, parts, textOverride) {
 }
 
 const SERVICE_FORMS = {
-    "Hair Transplant": { questions: [Q.since_when, Q.family_history, Q.medications, PT, photoQ(3, { en: "your scalp (Front, Top & Back View)", hi: "स्कैल्प (आगे, ऊपर और पीछे)", gu: "સ્કાલ્પ (આગળ, ઉપર અને પાછળ)" })] },
+    "Hair Transplant": { questions: [Q.since_hairloss, Q.family_history, Q.medications, PT, photoQ(3, { en: "your scalp (Front, Top & Back View)", hi: "स्कैल्प (आगे, ऊपर और पीछे)", gu: "સ્કાલ્પ (આગળ, ઉપર અને પાછળ)" })] },
     "Hair Growth": { questions: [PT] },
     "Laser Hair Removal": { questions: [PT] },
     "Rhinoplasty": { questions: [Q.nose_history, Q.medications, PT, photoQ(3, { en: "your nose (Front, Left & Right Side View)", hi: "नाक (आगे, बाएं और दाएं साइड)", gu: "નાક (આગળ, ડાબી અને જમણી સાઈડ)" })] },
@@ -115,21 +121,21 @@ const SERVICE_FORMS = {
     "Jawline Creation": { questions: [Q.jaw_goal, Q.jaw_history, PT, photoQ(2, { en: "your face (Front, Side & Profile View)", hi: "चेहरा (आगे, साइड और प्रोफाइल)", gu: "ચહેરો (આગળ, સાઈડ અને પ્રોફાઈલ)" })] },
     "Double Chin Reduction": { questions: [Q.height_weight, Q.chin_concern, PT, photoQ(2, { en: "your face and neck (Front & Side View)", hi: "चेहरा और गला (आगे और साइड)", gu: "ચહેરો અને ગળું (આગળ અને સાઈડ)" })] },
     "Otoplasty": { questions: [Q.ear_concern, Q.ear_history, PT, photoQ(2, { en: "your ears (Front, Left & Right Side View)", hi: "कान (आगे, बाएं और दाएं साइड)", gu: "કાન (આગળ, ડાબી અને જમણી સાઈડ)" })] },
-    "Breast Augmentation": { questions: [Q.since_when, Q.medications, Q.breast_history, PT] },
-    "Breast Reduction": { questions: [Q.since_when, Q.medications, Q.breast_history, PT] },
-    "Breast Lift": { questions: [Q.since_when, Q.medications, Q.breast_history, PT] },
+    "Breast Augmentation": { questions: [Q.since_concern, Q.breast_goal, Q.medications, Q.breast_history, PT] },
+    "Breast Reduction": { questions: [Q.since_concern, Q.breast_goal, Q.medications, Q.breast_history, PT] },
+    "Breast Lift": { questions: [Q.since_concern, Q.breast_goal, Q.medications, Q.breast_history, PT] },
     "Axillary Breast Removal": { questions: [PT] },
     "Breast Swelling Excision": { questions: [PT] },
     "Mommy Makeover": { questions: [Q.mommy_since, Q.mommy_breastfeeding, Q.height_weight, Q.mommy_areas, Q.medications, PT] },
     "Genital Rejuvenation": { questions: [Q.genital_concern, Q.genital_history, PT] },
-    "Liposuction": { questions: [Q.since_when, Q.height_weight, Q.medications, PT] },
-    "Abdominoplasty": { questions: [Q.since_when, Q.height_weight, Q.tummy_history, Q.medications, PT] },
+    "Liposuction": { questions: [Q.lipo_since, Q.height_weight, Q.medications, PT] },
+    "Abdominoplasty": { questions: [Q.tummy_since, Q.height_weight, Q.tummy_history, Q.medications, PT] },
     "Gender Reassignment M-F": { questions: [PT] },
     "Gender Reassignment F-M": { questions: [PT] },
-    "Gynecomastia Surgery": { questions: [Q.since_when, Q.medications, PT, photoQ(2, { en: "your chest (Front & Side View)", hi: "छाती (आगे और साइड)", gu: "છાતી (આગળ અને સાઈડ)" }, { en: "📸 Please share 2-3 clear photos of your chest (Front & Side View).", hi: "📸 कृपया छाती की 2-3 साफ फोटो भेजें (आगे और साइड)।", gu: "📸 કૃપા કરીને છાતીના 2-3 સ્પષ્ટ ફોટો મોકલો (આગળ અને સાઈડ)." })] },
-    "Skin Rejuvenation": { questions: [Q.since_when, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
-    "Acne Scar Treatment": { questions: [Q.since_when, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
-    "Skin Pigmentation": { questions: [Q.since_when, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
+    "Gynecomastia Surgery": { questions: [Q.since_problem, Q.medications, PT, photoQ(2, { en: "your chest (Front & Side View)", hi: "छाती (आगे और साइड)", gu: "છાતી (આગળ અને સાઈડ)" }, { en: "📸 Please share 2-3 clear photos of your chest (Front & Side View).", hi: "📸 कृपया छाती की 2-3 साफ फोटो भेजें (आगे और साइड)।", gu: "📸 કૃપા કરીને છાતીના 2-3 સ્પષ્ટ ફોટો મોકલો (આગળ અને સાઈડ)." })] },
+    "Skin Rejuvenation": { questions: [Q.since_skin_concern, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
+    "Acne Scar Treatment": { questions: [Q.since_skin_concern, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
+    "Skin Pigmentation": { questions: [Q.since_skin_concern, Q.skin_concern, Q.medications, Q.skin_treatment_history, PT, photoQ(2, { en: "the affected area in good lighting (Front & Close-up View)", hi: "प्रभावित क्षेत्र (अच्छी रोशनी में, आगे और क्लोज़-अप)", gu: "અસરગ્રસ્ત વિસ્તાર (સારા પ્રકાશમાં, આગળ અને ક્લોઝ-અપ)" })] },
     "Scar Revision": { questions: [PT] },
     "Vitiligo": { questions: [PT] }
 };
@@ -181,6 +187,8 @@ function isValidTextAnswer(m) {
 async function sendQuestion(ph, q, lang) {
     if (q.type === "buttons") {
         await sendButtons(ph, t(q.text, lang), q.options, "Celebre Aesthetics");
+    } else if (q.type === "list") {
+        await sendList(ph, t(q.text, lang), "Select", [{ title: "Options", rows: q.options.map(o => ({ title: o, description: " " })) }], "Celebre Aesthetics");
     } else if (q.type === "photo") {
         await sendText(ph, t(q.text, lang));
     } else {
@@ -288,7 +296,7 @@ router.post("/", async (req, res) => {
                     await sendText(phone, t("v_photo", lang));
                     return res.status(200).json({ success: true });
                 }
-            } else if (currentQ.type === "buttons") {
+            } else if (currentQ.type === "buttons" || currentQ.type === "list") {
                 if (media || message === "__PHOTO__") {
                     await sendText(phone, t("force_answer", lang));
                     await sendQuestion(phone, currentQ, lang);
